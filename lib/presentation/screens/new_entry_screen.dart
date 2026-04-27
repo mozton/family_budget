@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../features/transactions/domain/entity/transction_entity.dart';
+import '../../features/transactions/presentation/bloc/transactions_bloc.dart';
+import '../../features/transactions/presentation/bloc/transactions_event.dart';
 
 class NewEntryScreen extends StatefulWidget {
   const NewEntryScreen({super.key});
@@ -12,6 +17,9 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
   bool isExpense = true;
   String selectedCategory = 'Comida';
   bool isPrivate = false;
+
+  final TextEditingController amountController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
 
   // Colores de la paleta "Nuestra Bóveda"
   final Color primaryPurple = const Color(0xFF9333EA);
@@ -105,6 +113,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                 SizedBox(
                   width: 150,
                   child: TextField(
+                    controller: amountController,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.quicksand(
@@ -257,19 +266,24 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
   Widget _buildAddCategoryButton() {
     return Column(
       children: [
-        Container(
-          height: 64,
-          width: 64,
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.grey[200]!,
-              width: 2,
-              style: BorderStyle.solid,
+        InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, '/new_category');
+          },
+          child: Container(
+            height: 64,
+            width: 64,
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.grey[200]!,
+                width: 2,
+                style: BorderStyle.solid,
+              ),
             ),
+            child: Icon(Icons.add, color: Colors.grey[500]),
           ),
-          child: Icon(Icons.add, color: Colors.grey[500]),
         ),
         const SizedBox(height: 8),
         Text(
@@ -304,6 +318,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
             ),
           ),
           TextField(
+            controller: noteController,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.quicksand(
@@ -391,7 +406,31 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
         ],
       ),
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          final amountText = amountController.text;
+          if (amountText.isEmpty) return;
+
+          final amount = double.tryParse(amountText) ?? 0.0;
+          if (amount <= 0) return;
+
+          final transaction = TransactionEntity(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            amount: amount,
+            title: noteController.text.isEmpty
+                ? selectedCategory
+                : noteController.text,
+            categoryId: selectedCategory,
+            date: DateTime.now(),
+            userId: "Zamir", // Hardcoded para el ejemplo
+            isPrivate: isPrivate,
+            isExpense: isExpense,
+          );
+
+          context.read<TransactionsBloc>().add(
+            AddTransactionEvent(transaction),
+          );
+          Navigator.pop(context);
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
@@ -409,5 +448,12 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    amountController.dispose();
+    noteController.dispose();
+    super.dispose();
   }
 }

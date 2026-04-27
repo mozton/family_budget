@@ -40,7 +40,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                "Alex Rodríguez",
+                "Zamir Florentino",
                 style: GoogleFonts.quicksand(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -49,7 +49,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                "Pareja de Sofía ❤️",
+                "Pareja de Marielena ❤️",
                 style: GoogleFonts.quicksand(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -88,7 +88,12 @@ class ProfileScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.settings, color: Colors.grey[400], size: 20),
+                    Image(
+                      image: AssetImage('assets/settings.png'),
+                      width: 28,
+                      height: 28,
+                      color: Colors.grey[400],
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       "Ajustes de Cuenta",

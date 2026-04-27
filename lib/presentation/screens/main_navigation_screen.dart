@@ -59,26 +59,28 @@ class _MainNavigationState extends State<MainNavigation> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            _buildNavItem(Icons.home_rounded, "Inicio", 0),
-            _buildNavItem(Icons.list_alt_rounded, "Lista", 1),
-            const SizedBox(width: 40), // Espacio para el FAB
-            _buildNavItem(Icons.favorite_rounded, "Sueños", 2),
-            _buildNavItem(Icons.person_rounded, "Perfil", 3),
+            _buildNavItem('assets/home.png', "Inicio", 0),
+            _buildNavItem('assets/list.png', "Movimientos", 1),
+            const SizedBox(width: 40),
+            _buildNavItem('assets/clock.png', "Metas", 2),
+            _buildNavItem('assets/user.png', "Perfil", 3),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
+  Widget _buildNavItem(String assetName, String label, int index) {
     bool isSelected = _selectedIndex == index;
     return InkWell(
       onTap: () => _onItemTapped(index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
+          Image(
+            image: AssetImage(assetName),
+            width: 28,
+            height: 28,
             color: isSelected ? const Color(0xFF9333EA) : Colors.grey[300],
           ),
           Text(
