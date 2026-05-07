@@ -32,9 +32,11 @@ class DreamsScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: primaryPurple.withOpacity(0.05),
+                  color: primaryPurple.withValues(alpha: .05),
                   borderRadius: BorderRadius.circular(32),
-                  border: Border.all(color: primaryPurple.withOpacity(0.1)),
+                  border: Border.all(
+                    color: primaryPurple.withValues(alpha: .1),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +46,7 @@ class DreamsScreen extends StatelessWidget {
                       style: GoogleFonts.quicksand(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: primaryPurple.withOpacity(0.6),
+                        color: primaryPurple.withValues(alpha: .6),
                         letterSpacing: 1.5,
                       ),
                     ),
@@ -102,12 +104,12 @@ class DreamsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
+        color: Colors.white.withValues(alpha: .8),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
+        border: Border.all(color: Colors.white.withValues(alpha: .3)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1F2687).withOpacity(0.07),
+            color: const Color(0xFF1F2687).withValues(alpha: .07),
             blurRadius: 32,
             offset: const Offset(0, 8),
           ),
@@ -123,7 +125,7 @@ class DreamsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: .05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),

@@ -38,7 +38,7 @@ class _MainNavigationState extends State<MainNavigation> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const NewEntryScreen()),
+            MaterialPageRoute(builder: (context) => NewEntryScreen()),
           );
         },
         backgroundColor: const Color(0xFF9333EA),

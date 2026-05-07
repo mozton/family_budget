@@ -25,7 +25,7 @@ class ProfileScreen extends StatelessWidget {
                   border: Border.all(color: Colors.purple[200]!, width: 4),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: .1),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -145,7 +145,7 @@ class ProfileScreen extends StatelessWidget {
         border: Border.all(color: Colors.grey[50]!),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: .02),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

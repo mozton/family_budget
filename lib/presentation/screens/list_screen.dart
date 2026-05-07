@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:family_budget/presentation/screens/budget_screen.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -9,8 +10,64 @@ class HistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: background,
+        appBar: AppBar(
+          backgroundColor: background,
+          elevation: 0,
+          toolbarHeight: 10,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(60),
+            child: Container(
+              height: 50,
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: TabBar(
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                indicator: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                labelColor: const Color(0xFF1F2937),
+                unselectedLabelColor: Colors.grey[400],
+                labelStyle: GoogleFonts.quicksand(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                tabs: const [
+                  Tab(text: "Movimientos"),
+                  Tab(text: "Presupuesto"),
+                ],
+              ),
+            ),
+          ),
+        ),
+        body: const TabBarView(children: [_MovementsView(), BudgetPage()]),
+      ),
+    );
+  }
+}
+
+class _MovementsView extends StatelessWidget {
+  const _MovementsView();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: const Color(0xFFFDFBFF),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -34,7 +91,7 @@ class HistoryScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
+                      color: Colors.black.withValues(alpha: .02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -120,7 +177,7 @@ class HistoryScreen extends StatelessWidget {
         border: Border.all(color: const Color(0xFFF9FAFB)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: .02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

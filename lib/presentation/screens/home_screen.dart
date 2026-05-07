@@ -68,7 +68,10 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: lilaPastel.withOpacity(0.5), width: 2),
+            border: Border.all(
+              color: lilaPastel.withValues(alpha: .5),
+              width: 2,
+            ),
           ),
           child: const CircleAvatar(
             radius: 24,
@@ -95,7 +98,7 @@ class HomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: lilaPastel.withOpacity(0.3),
+            color: lilaPastel.withValues(alpha: .3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -110,7 +113,7 @@ class HomeScreen extends StatelessWidget {
               Text(
                 "Excedente por persona",
                 style: GoogleFonts.quicksand(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: .9),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -120,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: .2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -159,7 +162,7 @@ class HomeScreen extends StatelessWidget {
                 height: 10,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: .3),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -172,7 +175,7 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: .1),
                         blurRadius: 4,
                       ),
                     ],
@@ -194,7 +197,7 @@ class HomeScreen extends StatelessWidget {
           label,
           style: GoogleFonts.quicksand(
             fontSize: 11,
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: .8),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -231,7 +234,7 @@ class HomeScreen extends StatelessWidget {
               boxShadow: isFirst
                   ? [
                       BoxShadow(
-                        color: primaryPurple.withOpacity(0.3),
+                        color: primaryPurple.withValues(alpha: .3),
                         blurRadius: 8,
                       ),
                     ]
@@ -330,7 +333,7 @@ class HomeScreen extends StatelessWidget {
         border: Border.all(color: const Color(0xFFF9FAFB)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: .02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

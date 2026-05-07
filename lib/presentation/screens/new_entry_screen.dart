@@ -1,10 +1,10 @@
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
+import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
+import 'package:family_budget/features/categories/presentation/widgets/category_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../features/transactions/domain/entity/transction_entity.dart';
-import '../../features/transactions/presentation/bloc/transactions_bloc.dart';
-import '../../features/transactions/presentation/bloc/transactions_event.dart';
 
 class NewEntryScreen extends StatefulWidget {
   const NewEntryScreen({super.key});
@@ -15,163 +15,168 @@ class NewEntryScreen extends StatefulWidget {
 
 class _NewEntryScreenState extends State<NewEntryScreen> {
   bool isExpense = true;
-  String selectedCategory = 'Comida';
+  String? selectedCategoryName;
   bool isPrivate = false;
 
   final TextEditingController amountController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
 
-  // Colores de la paleta "Nuestra Bóveda"
   final Color primaryPurple = const Color(0xFF9333EA);
   final Color lilaPastel = const Color(0xFFA18CD1);
   final Color rosaPastel = const Color(0xFFFBC2EB);
   final Color incomeGreen = const Color(0xFF10B981);
   final Color expenseRed = const Color(0xFFF87171);
 
-  final List<Map<String, dynamic>> expenseCategories = [
-    {'id': 'Comida', 'emoji': '🥗', 'color': const Color(0xFFFFF7ED)},
-    {'id': 'Hogar', 'emoji': '🏠', 'color': const Color(0xFFEFF6FF)},
-    {'id': 'Ocio', 'emoji': '🎬', 'color': const Color(0xFFFAF5FF)},
-    {'id': 'Transp.', 'emoji': '🚗', 'color': const Color(0xFFFEFCE8)},
-    {'id': 'Salud', 'emoji': '🏥', 'color': const Color(0xFFFEF2F2)},
-  ];
-
-  final List<Map<String, dynamic>> incomeCategories = [
-    {'id': 'Sueldo', 'emoji': '💰', 'color': const Color(0xFFF0FDF4)},
-    {'id': 'Freelance', 'emoji': '💻', 'color': const Color(0xFFECFEFF)},
-    {'id': 'Regalo', 'emoji': '🎁', 'color': const Color(0xFFFDF2F8)},
-    {'id': 'Inversión', 'emoji': '📈', 'color': const Color(0xFFECFDF5)},
-  ];
-
-  List<Map<String, dynamic>> get currentCategories =>
-      isExpense ? expenseCategories : incomeCategories;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFDFBFF),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.grey),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Nueva Entrada',
-          style: GoogleFonts.quicksand(
-            color: const Color(0xFF1F2937),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            // Toggle Gasto/Ingreso
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  _buildTypeButton("Gasto", true),
-                  _buildTypeButton("Ingreso", false),
-                ],
-              ),
+    return BlocBuilder<CategoryBloc, CategoryState>(
+      builder: (context, state) {
+        final filteredCategories = state.categories
+            .where(
+              (c) =>
+                  c.type ==
+                  (isExpense ? CategoryType.expense : CategoryType.income),
+            )
+            .toList();
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFFDFBFF),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.close, color: Colors.grey),
+              onPressed: () => Navigator.pop(context),
             ),
-            const SizedBox(height: 40),
-            // Input de Monto
-            Text(
-              "MONTO",
+            title: Text(
+              'Nueva Entrada',
               style: GoogleFonts.quicksand(
-                fontSize: 12,
+                color: const Color(0xFF1F2937),
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[500],
-                letterSpacing: 1.2,
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
               children: [
+                const SizedBox(height: 20),
+                // Toggle Gasto/Ingreso
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildTypeButton("Gasto", true),
+                      _buildTypeButton("Ingreso", false),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+                // Input de Monto
                 Text(
-                  "\$",
+                  "MONTO",
                   style: GoogleFonts.quicksand(
-                    fontSize: 40,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: isExpense
-                        ? expenseRed.withOpacity(0.5)
-                        : incomeGreen.withOpacity(0.5),
+                    color: Colors.grey[500],
+                    letterSpacing: 1.2,
                   ),
                 ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  width: 150,
-                  child: TextField(
-                    controller: amountController,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.quicksand(
-                      fontSize: 50,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1F2937),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "\$",
+                      style: GoogleFonts.quicksand(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: isExpense
+                            ? expenseRed.withValues(alpha: .5)
+                            : incomeGreen.withValues(alpha: .5),
+                      ),
                     ),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "0.00",
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 150,
+                      child: TextField(
+                        controller: amountController,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 50,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1F2937),
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "0.00",
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 40),
+                // Grid de Categorías
+                Text(
+                  "CATEGORÍA",
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[500],
+                    letterSpacing: 1.5,
                   ),
                 ),
+                const SizedBox(height: 20),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20,
+                    childAspectRatio: 0.9,
+                  ),
+                  itemCount: filteredCategories.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == filteredCategories.length) {
+                      return _buildAddCategoryButton(context);
+                    }
+
+                    final category = filteredCategories[index];
+                    return CategoryItem(
+                      name: category.name,
+                      emoji: category.icon,
+                      type: isExpense ? 'expense' : 'income',
+                      color: category.color,
+                      isSelected: selectedCategoryName == category.name,
+                      onTap: () {
+                        setState(() {
+                          selectedCategoryName = category.name;
+                        });
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 40),
+                // Campo de Nota
+                _buildCustomTextField("Nota", "¿En qué lo usaste?"),
+                const SizedBox(height: 20),
+                // Toggle Privado
+                _buildPrivateToggle(),
+                const SizedBox(height: 40),
+                // Botón Registrar
+                _buildSubmitButton(),
+                const SizedBox(height: 40),
               ],
             ),
-            const SizedBox(height: 40),
-            // Grid de Categorías
-            Text(
-              "CATEGORÍA",
-              style: GoogleFonts.quicksand(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[500],
-                letterSpacing: 1.5,
-              ),
-            ),
-            const SizedBox(height: 20),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-                childAspectRatio: 0.9,
-              ),
-              itemCount: currentCategories.length + 1,
-              itemBuilder: (context, index) {
-                if (index == currentCategories.length) {
-                  return _buildAddCategoryButton();
-                }
-                final cat = currentCategories[index];
-                return _buildCategoryItem(cat);
-              },
-            ),
-            const SizedBox(height: 40),
-            // Campo de Nota
-            _buildCustomTextField("Nota", "¿En qué lo usaste?"),
-            const SizedBox(height: 20),
-            // Toggle Privado
-            _buildPrivateToggle(),
-            const SizedBox(height: 40),
-            // Botón Registrar
-            _buildSubmitButton(),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -183,9 +188,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
           if (isExpense != type) {
             setState(() {
               isExpense = type;
-              selectedCategory = isExpense
-                  ? expenseCategories.first['id'] as String
-                  : incomeCategories.first['id'] as String;
+              selectedCategoryName = null;
             });
           }
         },
@@ -198,7 +201,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
             boxShadow: active
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: .05),
                       blurRadius: 10,
                     ),
                   ]
@@ -217,53 +220,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     );
   }
 
-  Widget _buildCategoryItem(Map<String, dynamic> cat) {
-    bool isSelected = selectedCategory == cat['id'];
-    return GestureDetector(
-      onTap: () => setState(() => selectedCategory = cat['id']!),
-      child: Column(
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: 64,
-            width: 64,
-            decoration: BoxDecoration(
-              color: cat['color'],
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isSelected
-                    ? primaryPurple.withOpacity(0.5)
-                    : Colors.transparent,
-                width: 2,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: primaryPurple.withOpacity(0.1),
-                        blurRadius: 10,
-                      ),
-                    ]
-                  : [],
-            ),
-            child: Center(
-              child: Text(cat['emoji']!, style: const TextStyle(fontSize: 28)),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            cat['id']!.toUpperCase(),
-            style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? const Color(0xFF1F2937) : Colors.grey[500],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddCategoryButton() {
+  Widget _buildAddCategoryButton(BuildContext context) {
     return Column(
       children: [
         InkWell(
@@ -336,16 +293,20 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
 
   Widget _buildPrivateToggle() {
     return GestureDetector(
-      onTap: () => setState(() => isPrivate = !isPrivate),
+      onTap: () {
+        setState(() => isPrivate = !isPrivate);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isPrivate ? primaryPurple.withOpacity(0.05) : Colors.grey[50],
+          color: isPrivate
+              ? primaryPurple.withValues(alpha: .05)
+              : Colors.grey[50],
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isPrivate
-                ? primaryPurple.withOpacity(0.1)
+                ? primaryPurple.withValues(alpha: .05)
                 : Colors.grey[100]!,
           ),
         ),
@@ -377,8 +338,10 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
             ),
             Switch(
               value: isPrivate,
-              onChanged: (v) => setState(() => isPrivate = v),
-              activeColor: primaryPurple,
+              onChanged: (v) {
+                setState(() => isPrivate = v);
+              },
+              activeThumbColor: primaryPurple,
             ),
           ],
         ),
@@ -399,38 +362,14 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: (isExpense ? lilaPastel : incomeGreen).withOpacity(0.3),
+            color: (isExpense ? lilaPastel : incomeGreen).withValues(alpha: .3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
       child: ElevatedButton(
-        onPressed: () {
-          final amountText = amountController.text;
-          if (amountText.isEmpty) return;
-
-          final amount = double.tryParse(amountText) ?? 0.0;
-          if (amount <= 0) return;
-
-          final transaction = TransactionEntity(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            amount: amount,
-            title: noteController.text.isEmpty
-                ? selectedCategory
-                : noteController.text,
-            categoryId: selectedCategory,
-            date: DateTime.now(),
-            userId: "Zamir", // Hardcoded para el ejemplo
-            isPrivate: isPrivate,
-            isExpense: isExpense,
-          );
-
-          context.read<TransactionsBloc>().add(
-            AddTransactionEvent(transaction),
-          );
-          Navigator.pop(context);
-        },
+        onPressed: () {},
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
