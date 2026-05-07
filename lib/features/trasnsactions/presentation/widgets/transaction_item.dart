@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class TransactionItem extends StatelessWidget {
-  final String emoji;
+  final IconData? icon;
+  final Color iconColor;
   final String title;
   final String date;
   final String user;
@@ -12,7 +14,8 @@ class TransactionItem extends StatelessWidget {
 
   const TransactionItem({
     super.key,
-    required this.emoji,
+    this.icon,
+    required this.iconColor,
     required this.title,
     required this.date,
     required this.user,
@@ -44,13 +47,13 @@ class TransactionItem extends StatelessWidget {
             height: 48,
             width: 48,
             decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
+              color: iconColor.withValues(alpha: .15),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Text(emoji, style: const TextStyle(fontSize: 24)),
+                Icon(icon ?? TablerIcons.category, size: 24, color: iconColor),
                 if (isPrivate)
                   Positioned(
                     top: 0,

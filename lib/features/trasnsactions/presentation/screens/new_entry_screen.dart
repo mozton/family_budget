@@ -7,6 +7,7 @@ import 'package:family_budget/features/trasnsactions/presentation/bloc/transacti
 import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 
 class NewEntryScreen extends StatefulWidget {
@@ -19,6 +20,8 @@ class NewEntryScreen extends StatefulWidget {
 class _NewEntryScreenState extends State<NewEntryScreen> {
   bool isExpense = true;
   String? selectedCategoryName;
+  IconData? selectedIcon;
+  Color? selectedColor;
   bool isPrivate = false;
 
   final TextEditingController amountController = TextEditingController();
@@ -96,7 +99,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "\$",
+                        "DOP",
                         style: GoogleFonts.quicksand(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
@@ -156,11 +159,13 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                       final category = filteredCategories[index];
                       return CategoryItem(
                         name: category.name,
-                        emoji: category.icon,
+                        icon: category.icon,
                         type: isExpense ? 'expense' : 'income',
                         color: category.color!,
                         isSelected: selectedCategoryName == category.name,
                         onTap: () {
+                          selectedIcon = category.icon;
+                          selectedColor = category.color;
                           setState(() {
                             selectedCategoryName = category.name;
                           });
@@ -179,7 +184,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                   _buildPrivateToggle(),
                   const SizedBox(height: 40),
                   // Botón Registrar
-                  _buildSubmitButton(context),
+                  _buildSubmitButton(context, filteredCategories),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -460,7 +465,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context) {
+  Widget _buildSubmitButton(BuildContext context, List<Category> categories) {
     return Container(
       width: double.infinity,
       height: 60,
@@ -481,15 +486,29 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
       ),
       child: ElevatedButton(
         onPressed: () {
+          if (selectedCategoryName == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Por favor selecciona una categoría'),
+              ),
+            );
+            return;
+          }
+
+          final selectedCategory = categories.firstWhere(
+            (c) => c.name == selectedCategoryName,
+          );
+
           final transactionEvent = AddTransactionEvent(
-            amount: double.parse(amountController.text),
+            amount: double.tryParse(amountController.text) ?? 0.0,
             note: noteController.text,
             date: DateTime.now(),
             isPrivate: isPrivate,
             category: Category(
-              name: selectedCategoryName!,
+              name: selectedCategory.name,
+              icon: selectedIcon!,
+              color: selectedColor!,
               type: isExpense ? CategoryType.expense : CategoryType.income,
-              icon: '',
             ),
             type: isExpense ? CategoryType.expense : CategoryType.income,
           );

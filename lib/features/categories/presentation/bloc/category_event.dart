@@ -1,10 +1,10 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 
 abstract class CategoryEvent {}
 
 class CreateCategory extends CategoryEvent {
   final String name;
-  final String icon;
+  final IconData icon;
   final String type;
   final Color color;
 

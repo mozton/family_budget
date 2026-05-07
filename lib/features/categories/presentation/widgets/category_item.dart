@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CategoryItem extends StatelessWidget {
   final String name;
-  final String emoji;
+  final IconData icon;
   final String type;
   final Color color;
   final bool isSelected;
@@ -12,7 +12,7 @@ class CategoryItem extends StatelessWidget {
 
   const CategoryItem({
     required this.name,
-    required this.emoji,
+    required this.icon,
     required this.type,
     required this.color,
     required this.isSelected,
@@ -50,9 +50,7 @@ class CategoryItem extends StatelessWidget {
                     ]
                   : [],
             ),
-            child: Center(
-              child: Text(emoji, style: const TextStyle(fontSize: 28)),
-            ),
+            child: Center(child: Icon(icon, color: color, size: 30)),
           ),
           const SizedBox(height: 8),
           Text(

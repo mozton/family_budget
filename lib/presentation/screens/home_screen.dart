@@ -297,7 +297,8 @@ class HomeScreen extends StatelessWidget {
               itemBuilder: (BuildContext context, int index) {
                 final transaction = state.transactions[index];
                 return TransactionItem(
-                  emoji: transaction.category.icon,
+                  icon: transaction.category.icon,
+                  iconColor: transaction.category.color ?? Colors.grey,
                   title: transaction.category.name,
                   date: transaction.date.toString(),
                   user: 'Tu',

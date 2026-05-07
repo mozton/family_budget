@@ -4,7 +4,7 @@ enum CategoryType { income, expense }
 
 class Category {
   final String name;
-  final String icon;
+  final IconData icon;
   final Color? color;
   final CategoryType? type;
   final double? balance;

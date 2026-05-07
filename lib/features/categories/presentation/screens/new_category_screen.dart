@@ -3,6 +3,7 @@ import 'package:family_budget/features/categories/presentation/bloc/category_eve
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 
@@ -16,8 +17,41 @@ class NewCategoryScreen extends StatefulWidget {
 
 class _NewCategoryScreenState extends State<NewCategoryScreen> {
   final TextEditingController titleController = TextEditingController();
-  final TextEditingController iconController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
+
+  late IconData selectedIcon;
+
+  final List<IconData> availableIcons = [
+    TablerIcons.shopping_cart,
+    TablerIcons.home,
+    TablerIcons.car,
+    TablerIcons.heart,
+    TablerIcons.device_gamepad_2,
+    TablerIcons.coffee,
+    TablerIcons.leaf,
+    TablerIcons.plane,
+    TablerIcons.cash,
+    TablerIcons.school,
+    TablerIcons.shirt,
+    TablerIcons.bus,
+    TablerIcons.tools,
+    TablerIcons.gift,
+    TablerIcons.moneybag,
+    TablerIcons.building_community,
+    TablerIcons.candle,
+    TablerIcons.beach,
+    TablerIcons.bottle,
+    TablerIcons.pills,
+    TablerIcons.palette,
+    TablerIcons.building_store,
+    TablerIcons.bulb,
+    TablerIcons.gas_station,
+    TablerIcons.briefcase,
+    TablerIcons.network,
+    TablerIcons.credit_card,
+    TablerIcons.gift,
+    TablerIcons.pig_money,
+  ];
 
   bool isPrivate = false;
 
@@ -47,6 +81,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
     super.initState();
     colorSelected = colors.first;
     typeSelected = widget.type;
+    selectedIcon = availableIcons.first;
   }
 
   @override
@@ -85,11 +120,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                     titleController,
                   ),
                   const SizedBox(height: 20),
-                  _buildCustomTextField(
-                    "Emoji representativo",
-                    "Ej. 🐶",
-                    iconController,
-                  ),
+                  _buildIconSelector(context),
                   const SizedBox(height: 30),
                   _buildColorPicker(),
                   const SizedBox(height: 30),
@@ -98,6 +129,135 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                   _buildSubmitButton(),
                 ],
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIconSelector(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showIconPicker(context),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: colorSelected.withValues(alpha: .1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(selectedIcon, color: colorSelected),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "ICONO".toUpperCase(),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                  Text(
+                    "Toca para cambiar",
+                    style: GoogleFonts.quicksand(
+                      color: const Color(0xFF1F2937),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey[400]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showIconPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * .8,
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  "Selecciona un icono",
+                  style: GoogleFonts.quicksand(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                  ),
+                  itemCount: availableIcons.length,
+                  itemBuilder: (context, index) {
+                    final icon = availableIcons[index];
+                    final isSelected = selectedIcon == icon;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => selectedIcon = icon);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? primaryPurple : Colors.grey[50],
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isSelected
+                                ? primaryPurple
+                                : Colors.transparent,
+                          ),
+                        ),
+                        child: Icon(
+                          icon,
+                          color: isSelected ? Colors.white : Colors.grey[600],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
             ),
           ),
         );
@@ -282,7 +442,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
         onPressed: () {
           final newCategory = CreateCategory(
             name: titleController.text,
-            icon: iconController.text,
+            icon: selectedIcon,
             color: colorSelected,
             type: typeSelected,
           );
