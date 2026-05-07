@@ -3,6 +3,8 @@ import 'package:family_budget/features/categories/presentation/bloc/category_blo
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_item.dart';
+import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_bloc.dart';
+import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -40,143 +42,147 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
             )
             .toList();
 
-        return Scaffold(
-          backgroundColor: const Color(0xFFFDFBFF),
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.close, color: Colors.grey),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              'Nueva Entrada',
-              style: GoogleFonts.quicksand(
-                color: const Color(0xFF1F2937),
-                fontWeight: FontWeight.bold,
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Scaffold(
+            backgroundColor: const Color(0xFFFDFBFF),
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.close, color: Colors.grey),
+                onPressed: () => Navigator.pop(context),
               ),
+              title: Text(
+                'Nueva Entrada',
+                style: GoogleFonts.quicksand(
+                  color: const Color(0xFF1F2937),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              centerTitle: true,
             ),
-            centerTitle: true,
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                // Toggle Gasto/Ingreso
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(20),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  // Toggle Gasto/Ingreso
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        _buildTypeButton("Gasto", 'expense'),
+                        _buildTypeButton("Ingreso", 'income'),
+                      ],
+                    ),
                   ),
-                  child: Row(
+                  const SizedBox(height: 40),
+                  // Input de Monto
+                  Text(
+                    "MONTO",
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[500],
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildTypeButton("Gasto", 'expense'),
-                      _buildTypeButton("Ingreso", 'income'),
+                      Text(
+                        "\$",
+                        style: GoogleFonts.quicksand(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: isExpense
+                              ? expenseRed.withValues(alpha: .5)
+                              : incomeGreen.withValues(alpha: .5),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 150,
+                        child: TextField(
+                          controller: amountController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1F2937),
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "0.00",
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 40),
-                // Input de Monto
-                Text(
-                  "MONTO",
-                  style: GoogleFonts.quicksand(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[500],
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "\$",
-                      style: GoogleFonts.quicksand(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: isExpense
-                            ? expenseRed.withValues(alpha: .5)
-                            : incomeGreen.withValues(alpha: .5),
-                      ),
+                  const SizedBox(height: 40),
+                  // Grid de Categorías
+                  Text(
+                    "CATEGORÍA",
+                    style: GoogleFonts.quicksand(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[500],
+                      letterSpacing: 1.5,
                     ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 150,
-                      child: TextField(
-                        controller: amountController,
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 50,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1F2937),
-                        ),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "0.00",
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                // Grid de Categorías
-                Text(
-                  "CATEGORÍA",
-                  style: GoogleFonts.quicksand(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[500],
-                    letterSpacing: 1.5,
                   ),
-                ),
-                const SizedBox(height: 20),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20,
-                    childAspectRatio: 0.9,
-                  ),
-                  itemCount: filteredCategories.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == filteredCategories.length) {
-                      return _buildAddCategoryButton(context);
-                    }
+                  const SizedBox(height: 20),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 20,
+                          crossAxisSpacing: 20,
+                          childAspectRatio: 0.9,
+                        ),
+                    itemCount: filteredCategories.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == filteredCategories.length) {
+                        return _buildAddCategoryButton(context);
+                      }
 
-                    final category = filteredCategories[index];
-                    return CategoryItem(
-                      name: category.name,
-                      emoji: category.icon,
-                      type: isExpense ? 'expense' : 'income',
-                      color: category.color,
-                      isSelected: selectedCategoryName == category.name,
-                      onTap: () {
-                        setState(() {
-                          selectedCategoryName = category.name;
-                        });
-                      },
-                      onLongPress: () {
-                        _showDeleteCategoryDialog(context, category.name);
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 40),
-                // Campo de Nota
-                _buildCustomTextField("Nota", "¿En qué lo usaste?"),
-                const SizedBox(height: 20),
-                // Toggle Privado
-                _buildPrivateToggle(),
-                const SizedBox(height: 40),
-                // Botón Registrar
-                _buildSubmitButton(),
-                const SizedBox(height: 40),
-              ],
+                      final category = filteredCategories[index];
+                      return CategoryItem(
+                        name: category.name,
+                        emoji: category.icon,
+                        type: isExpense ? 'expense' : 'income',
+                        color: category.color!,
+                        isSelected: selectedCategoryName == category.name,
+                        onTap: () {
+                          setState(() {
+                            selectedCategoryName = category.name;
+                          });
+                        },
+                        onLongPress: () {
+                          _showDeleteCategoryDialog(context, category.name);
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 40),
+                  // Campo de Nota
+                  _buildCustomTextField("Nota", "¿En qué lo usaste?"),
+                  const SizedBox(height: 20),
+                  // Toggle Privado
+                  _buildPrivateToggle(),
+                  const SizedBox(height: 40),
+                  // Botón Registrar
+                  _buildSubmitButton(context),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         );
@@ -454,7 +460,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(BuildContext context) {
     return Container(
       width: double.infinity,
       height: 60,
@@ -474,7 +480,22 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
         ],
       ),
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          final transactionEvent = AddTransactionEvent(
+            amount: double.parse(amountController.text),
+            note: noteController.text,
+            date: DateTime.now(),
+            isPrivate: isPrivate,
+            category: Category(
+              name: selectedCategoryName!,
+              type: isExpense ? CategoryType.expense : CategoryType.income,
+              icon: '',
+            ),
+            type: isExpense ? CategoryType.expense : CategoryType.income,
+          );
+          context.read<TransactionBloc>().add(transactionEvent);
+          Navigator.pop(context);
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,

@@ -17,6 +17,9 @@ class NewCategoryScreen extends StatefulWidget {
 class _NewCategoryScreenState extends State<NewCategoryScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController iconController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
+
+  bool isPrivate = false;
 
   final List<Color> colors = [
     Color(0xFF9333EA),
@@ -232,7 +235,11 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: active ? Colors.white : Colors.transparent,
+            color: active
+                ? typeSelected == 'expense'
+                      ? const Color(0xFFFF6B6B).withValues(alpha: .3)
+                      : const Color(0xFF48BB78).withValues(alpha: .3)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
             boxShadow: active
                 ? [

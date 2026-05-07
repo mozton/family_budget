@@ -1,7 +1,7 @@
 import 'package:family_budget/presentation/screens/dream_screen.dart';
 import 'package:family_budget/presentation/screens/home_screen.dart';
 import 'package:family_budget/presentation/screens/list_screen.dart';
-import 'package:family_budget/presentation/screens/new_entry_screen.dart';
+import 'package:family_budget/features/trasnsactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/presentation/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -38,7 +38,7 @@ class _MainNavigationState extends State<MainNavigation> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => NewEntryScreen()),
+            MaterialPageRoute(builder: (context) => const NewEntryScreen()),
           );
         },
         backgroundColor: const Color(0xFF9333EA),

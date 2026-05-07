@@ -1,4 +1,9 @@
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
+import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_bloc.dart';
+import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_state.dart';
+import 'package:family_budget/features/trasnsactions/presentation/widgets/transaction_item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -30,7 +35,6 @@ class HomeScreen extends StatelessWidget {
               _buildRecentActivityHeader(),
               const SizedBox(height: 20),
               _buildTransactionList(),
-              const SizedBox(height: 100), // Espacio para el Navbar
             ],
           ),
         ),
@@ -282,128 +286,32 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildTransactionList() {
-    return Column(
-      children: [
-        _buildTransactionItem(
-          "🥗",
-          "Supermercado",
-          "Hoy, 10:30 AM",
-          "Ella",
-          "-\$120.50",
-          Colors.red[400]!,
-          false,
-        ),
-        _buildTransactionItem(
-          "🔒",
-          "Gasto Personal",
-          "Ayer, 08:15 PM",
-          "Tú",
-          "-\$45.00",
-          Colors.grey[400]!,
-          true,
-        ),
-        _buildTransactionItem(
-          "💰",
-          "Sueldo Alex",
-          "15 Abr",
-          "Tú",
-          "+\$3,000",
-          Colors.green[500]!,
-          false,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTransactionItem(
-    String emoji,
-    String title,
-    String date,
-    String user,
-    String amount,
-    Color amountColor,
-    bool isPrivate,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFF9FAFB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 48,
-            width: 48,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(16),
+    return BlocBuilder<TransactionBloc, TransactionState>(
+      builder: (context, state) {
+        return Column(
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: state.transactions.length,
+              itemBuilder: (BuildContext context, int index) {
+                final transaction = state.transactions[index];
+                return TransactionItem(
+                  emoji: transaction.category.icon,
+                  title: transaction.category.name,
+                  date: transaction.date.toString(),
+                  user: 'Tu',
+                  amount: transaction.amount.toString(),
+                  amountColor: transaction.category.type == CategoryType.expense
+                      ? Colors.red
+                      : Colors.green,
+                  isPrivate: transaction.isPrivate,
+                );
+              },
             ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(emoji, style: const TextStyle(fontSize: 24)),
-                if (isPrivate)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.lock,
-                        size: 10,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.quicksand(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1F2937),
-                  ),
-                ),
-                Text(
-                  "$date • $user",
-                  style: GoogleFonts.quicksand(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[400],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            amount,
-            style: GoogleFonts.quicksand(
-              fontWeight: FontWeight.bold,
-              color: amountColor,
-            ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }

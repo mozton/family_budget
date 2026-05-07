@@ -4,8 +4,10 @@ class CategoryModel extends Category {
   CategoryModel({
     required super.name,
     required super.icon,
-    required super.color,
-    required super.type,
+    super.color,
+    super.type,
+    super.balance,
+    super.estimate,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
@@ -14,10 +16,19 @@ class CategoryModel extends Category {
       icon: json['icon'],
       color: json['color'],
       type: CategoryType.values.firstWhere((e) => e.name == json['type']),
+      balance: json['balance'],
+      estimate: json['estimate'],
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'name': name, 'icon': icon, 'color': color, 'type': type.name};
+    return {
+      'name': name,
+      'icon': icon,
+      'color': color,
+      'type': type?.name,
+      'balance': balance,
+      'estimate': estimate,
+    };
   }
 }

@@ -10,7 +10,12 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final SaveCategory usecaseSave;
   final GetCategories usecaseGet;
   final DeleteCategory usecaseDelete;
-  CategoryBloc(super.categoryState, this.usecaseSave, this.usecaseGet, this.usecaseDelete) {
+  CategoryBloc(
+    super.categoryState,
+    this.usecaseSave,
+    this.usecaseGet,
+    this.usecaseDelete,
+  ) {
     on<CreateCategory>((event, emit) async {
       final newName = event.name;
       final newIcon = event.icon;
@@ -22,6 +27,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         icon: newIcon,
         color: newColor,
         type: CategoryType.values.firstWhere((e) => e.name == newType),
+        balance: 0,
+        estimate: 0,
       );
       await usecaseSave.saveCategory(newCategory);
       emit(CategoryState(categories: [...state.categories, newCategory]));
@@ -29,7 +36,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
     on<DeleteCategoryEvent>((event, emit) async {
       await usecaseDelete(event.name);
-      final updatedCategories = state.categories.where((c) => c.name != event.name).toList();
+      final updatedCategories = state.categories
+          .where((c) => c.name != event.name)
+          .toList();
       emit(CategoryState(categories: updatedCategories));
     });
   }
