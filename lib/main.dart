@@ -1,6 +1,7 @@
 import 'package:family_budget/features/categories/data/repository/category_repository_imp.dart';
 import 'package:family_budget/features/categories/domain/usercases/get_category.dart';
 import 'package:family_budget/features/categories/domain/usercases/save_category.dart';
+import 'package:family_budget/features/categories/domain/usercases/delete_category.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
@@ -18,6 +19,7 @@ void main() async {
   final categoryRepository = CategoryRepositoryFake();
   final saveCategoryUseCase = SaveCategory(categoryRepository);
   final getCategoriesUseCase = GetCategories(categoryRepository);
+  final deleteCategoryUseCase = DeleteCategory(categoryRepository);
 
   runApp(
     BlocProvider(
@@ -25,6 +27,7 @@ void main() async {
         CategoryState(),
         saveCategoryUseCase,
         getCategoriesUseCase,
+        deleteCategoryUseCase,
       ),
       child: MyApp(),
     ),
@@ -43,7 +46,12 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const MainNavigation(),
         '/new_entry': (context) => NewEntryScreen(),
-        '/new_category': (context) => const NewCategoryScreen(),
+        '/new_category': (context) {
+          final type =
+              ModalRoute.of(context)?.settings.arguments as String? ??
+              'expense';
+          return NewCategoryScreen(type: type);
+        },
         '/history': (context) => const HistoryScreen(),
         '/dreams': (context) => const DreamsScreen(),
         '/profile': (context) => const ProfileScreen(),

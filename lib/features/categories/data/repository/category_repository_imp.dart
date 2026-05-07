@@ -13,4 +13,9 @@ class CategoryRepositoryFake implements CategoryRepository {
   Future<List<Category>> getCategories() async {
     return _categories;
   }
+
+  @override
+  Future<void> deleteCategory(String name) async {
+    _categories.removeWhere((element) => element.name == name);
+  }
 }

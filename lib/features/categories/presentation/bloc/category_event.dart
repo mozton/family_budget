@@ -15,3 +15,8 @@ class CreateCategory extends CategoryEvent {
     required this.color,
   });
 }
+
+class DeleteCategoryEvent extends CategoryEvent {
+  final String name;
+  DeleteCategoryEvent(this.name);
+}

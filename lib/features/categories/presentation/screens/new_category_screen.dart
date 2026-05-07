@@ -7,7 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NewCategoryScreen extends StatefulWidget {
-  const NewCategoryScreen({super.key});
+  final String type;
+  const NewCategoryScreen({super.key, required this.type});
 
   @override
   State<NewCategoryScreen> createState() => _NewCategoryScreenState();
@@ -33,6 +34,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
   ];
 
   late Color colorSelected;
+  late String typeSelected;
 
   final Color primaryPurple = const Color(0xFF9333EA);
   final Color background = const Color(0xFFFDFBFF);
@@ -41,6 +43,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
   void initState() {
     super.initState();
     colorSelected = colors.first;
+    typeSelected = widget.type;
   }
 
   @override
@@ -86,6 +89,8 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                   ),
                   const SizedBox(height: 30),
                   _buildColorPicker(),
+                  const SizedBox(height: 30),
+                  _buildTypeSelector(),
                   const SizedBox(height: 40),
                   _buildSubmitButton(),
                 ],
@@ -188,6 +193,69 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
     );
   }
 
+  Widget _buildTypeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "TIPO DE CATEGORÍA",
+          style: GoogleFonts.quicksand(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[500],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              _buildTypeOption("Gasto", 'expense'),
+              _buildTypeOption("Ingreso", 'income'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTypeOption(String label, String type) {
+    bool active = typeSelected == type;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => typeSelected = type),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: active ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: active
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: .05),
+                      blurRadius: 10,
+                    ),
+                  ]
+                : [],
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.quicksand(
+              fontWeight: FontWeight.bold,
+              color: active ? const Color(0xFF1F2937) : Colors.grey[400],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSubmitButton() {
     return Container(
       width: double.infinity,
@@ -209,7 +277,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
             name: titleController.text,
             icon: iconController.text,
             color: colorSelected,
-            type: 'expense',
+            type: typeSelected,
           );
           context.read<CategoryBloc>().add(newCategory);
 

@@ -1,5 +1,6 @@
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_item.dart';
 import 'package:flutter/material.dart';
@@ -71,8 +72,8 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                   ),
                   child: Row(
                     children: [
-                      _buildTypeButton("Gasto", true),
-                      _buildTypeButton("Ingreso", false),
+                      _buildTypeButton("Gasto", 'expense'),
+                      _buildTypeButton("Ingreso", 'income'),
                     ],
                   ),
                 ),
@@ -159,6 +160,9 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                           selectedCategoryName = category.name;
                         });
                       },
+                      onLongPress: () {
+                        _showDeleteCategoryDialog(context, category.name);
+                      },
                     );
                   },
                 ),
@@ -180,14 +184,109 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     );
   }
 
-  Widget _buildTypeButton(String label, bool type) {
-    bool active = isExpense == type;
+  void _showDeleteCategoryDialog(BuildContext context, String categoryName) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                "¿Eliminar categoría?",
+                style: GoogleFonts.quicksand(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1F2937),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Se eliminará '$categoryName'. Esta acción no se puede deshacer.",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.quicksand(
+                  color: Colors.grey[500],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "Cancelar",
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.read<CategoryBloc>().add(
+                          DeleteCategoryEvent(categoryName),
+                        );
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: expenseRed,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        "Eliminar",
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTypeButton(String label, String type) {
+    const expense = 'expense';
+    const income = 'income';
+    bool active =
+        (isExpense && type == expense) || (!isExpense && type == income);
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          if (isExpense != type) {
+          bool newIsExpense = type == expense;
+          if (isExpense != newIsExpense) {
             setState(() {
-              isExpense = type;
+              isExpense = newIsExpense;
               selectedCategoryName = null;
             });
           }
@@ -225,7 +324,13 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
       children: [
         InkWell(
           onTap: () {
-            Navigator.pushNamed(context, '/new_category');
+            const expense = 'expense';
+            const income = 'income';
+            Navigator.pushNamed(
+              context,
+              '/new_category',
+              arguments: isExpense ? expense : income,
+            );
           },
           child: Container(
             height: 64,

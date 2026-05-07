@@ -8,6 +8,7 @@ class CategoryItem extends StatelessWidget {
   final Color color;
   final bool isSelected;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const CategoryItem({
     required this.name,
@@ -16,6 +17,7 @@ class CategoryItem extends StatelessWidget {
     required this.color,
     required this.isSelected,
     this.onTap,
+    this.onLongPress,
     super.key,
   });
 
@@ -23,6 +25,7 @@ class CategoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Column(
         children: [
           AnimatedContainer(
