@@ -21,25 +21,32 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       final newIcon = event.icon;
       final newColor = event.color;
       final newType = event.type;
+      final newEstimate = event.targetAmount;
+      final newCurrentAmount = event.currentAmount;
+      final newRemoteId = event.remoteId;
 
-      final newCategory = Category(
+      final newCategory = CategoryEntity(
         name: newName,
         icon: newIcon,
         color: newColor,
         type: CategoryType.values.firstWhere((e) => e.name == newType),
-        balance: 0,
-        estimate: 0,
+        currentAmount: newCurrentAmount,
+        targetAmount: newEstimate,
+        id: 'temp_user_id',
+        remoteId: newRemoteId,
       );
       await usecaseSave.saveCategory(newCategory);
-      emit(CategoryState(categories: [...state.categories, newCategory]));
+      add(LoadCategories());
     });
 
     on<DeleteCategoryEvent>((event, emit) async {
       await usecaseDelete(event.name);
-      final updatedCategories = state.categories
-          .where((c) => c.name != event.name)
-          .toList();
-      emit(CategoryState(categories: updatedCategories));
+      add(LoadCategories());
+    });
+
+    on<LoadCategories>((event, emit) async {
+      final categories = await usecaseGet.getCategories();
+      emit(CategoryState(categories: categories));
     });
   }
 }

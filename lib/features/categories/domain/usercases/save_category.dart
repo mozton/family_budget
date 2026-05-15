@@ -6,7 +6,7 @@ class SaveCategory {
 
   SaveCategory(this.repository);
 
-  Future<void> saveCategory(Category category) {
+  Future<void> saveCategory(CategoryEntity category) {
     return repository.saveCategory(category);
   }
 }

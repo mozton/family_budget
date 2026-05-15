@@ -1,4 +1,4 @@
-import 'package:family_budget/features/trasnsactions/domiain/entities/transaction_entity.dart';
+import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
 class TransactionModel extends Transaction {
   TransactionModel({

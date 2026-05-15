@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -88,11 +89,10 @@ class ProfileScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image(
-                      image: AssetImage('assets/settings.png'),
-                      width: 28,
-                      height: 28,
-                      color: Colors.grey[400],
+                    Icon(
+                      TablerIcons.settings,
+                      size: 24,
+                      color: Colors.grey[700],
                     ),
                     const SizedBox(width: 12),
                     Text(

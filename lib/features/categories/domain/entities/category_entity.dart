@@ -2,20 +2,28 @@ import 'package:flutter/material.dart';
 
 enum CategoryType { income, expense }
 
-class Category {
+class CategoryEntity {
+  final String id;
+  final String remoteId;
   final String name;
   final IconData icon;
   final Color? color;
   final CategoryType? type;
-  final double? balance;
-  final double? estimate;
+  final double currentAmount;
+  final double? targetAmount;
+  final bool isPrivate;
+  final String ownerId;
 
-  const Category({
+  const CategoryEntity({
+    required this.id,
     required this.name,
     required this.icon,
     this.color,
     this.type,
-    this.balance,
-    this.estimate,
+    required this.currentAmount,
+    this.targetAmount,
+    this.isPrivate = false,
+    this.ownerId = '',
+    required this.remoteId,
   });
 }

@@ -1,4 +1,4 @@
-import 'package:family_budget/features/trasnsactions/domiain/entities/transaction_entity.dart';
+import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
 abstract class TransactionRepository {
   // Future<List<Transaction>> getTransactions();

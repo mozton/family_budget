@@ -1,10 +1,12 @@
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
-import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_bloc.dart';
-import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_state.dart';
-import 'package:family_budget/features/trasnsactions/presentation/widgets/transaction_item.dart';
+import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
+import 'package:family_budget/features/transactions/presentation/bloc/transaction_state.dart';
+import 'package:family_budget/features/transactions/presentation/widgets/transaction_item.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,32 +19,36 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              _buildHeader(),
-              const SizedBox(height: 30),
-              _buildMainBalanceCard(),
-              const SizedBox(height: 30),
-              _buildCategoryFilters(),
-              const SizedBox(height: 30),
-              _buildRecentActivityHeader(),
-              const SizedBox(height: 20),
-              _buildTransactionList(),
-            ],
+    return BlocBuilder<TransactionBloc, TransactionState>(
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: background,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  _buildHeader(state.currentBalance),
+                  const SizedBox(height: 30),
+                  _buildMainBalanceCard(state),
+                  const SizedBox(height: 30),
+                  _buildCategoryFilters(),
+                  const SizedBox(height: 30),
+                  _buildRecentActivityHeader(),
+                  const SizedBox(height: 20),
+                  _buildTransactionList(state),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(double balance) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -59,7 +65,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             Text(
-              "\$3,850.25",
+              "\$${NumberFormat("#,##0.00", "en_US").format(balance)}",
               style: GoogleFonts.quicksand(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -89,7 +95,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainBalanceCard() {
+  Widget _buildMainBalanceCard(TransactionState state) {
+    final totalIncomes = state.totalIncomes + state.initialBalance;
+    final progressFactor = totalIncomes > 0
+        ? (state.currentBalance / totalIncomes).clamp(0.0, 1.0)
+        : 0.0;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -115,7 +126,7 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Excedente por persona",
+                "Tu ahorro",
                 style: GoogleFonts.quicksand(
                   color: Colors.white.withValues(alpha: .9),
                   fontWeight: FontWeight.w600,
@@ -131,7 +142,7 @@ class HomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  "META ABRIL",
+                  "ESTADO ACTUAL",
                   style: GoogleFonts.quicksand(
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
@@ -143,7 +154,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "\$1,925.12",
+            "\$${NumberFormat("#,##0.00", "en_US").format(state.currentBalance)}",
             style: GoogleFonts.quicksand(
               fontSize: 32,
               fontWeight: FontWeight.bold,
@@ -154,8 +165,14 @@ class HomeScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCardMiniStat("Entradas", "\$6,200"),
-              _buildCardMiniStat("Salidas", "\$2,350"),
+              _buildCardMiniStat(
+                "Entradas",
+                "\$${NumberFormat("#,###", "en_US").format(state.totalIncomes)}",
+              ),
+              _buildCardMiniStat(
+                "Salidas",
+                "\$${NumberFormat("#,###", "en_US").format(state.totalExpenses)}",
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -171,7 +188,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               FractionallySizedBox(
-                widthFactor: 0.65,
+                widthFactor: progressFactor,
                 child: Container(
                   height: 10,
                   decoration: BoxDecoration(
@@ -285,34 +302,33 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionList() {
-    return BlocBuilder<TransactionBloc, TransactionState>(
-      builder: (context, state) {
-        return Column(
-          children: [
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: state.transactions.length,
-              itemBuilder: (BuildContext context, int index) {
-                final transaction = state.transactions[index];
-                return TransactionItem(
-                  icon: transaction.category.icon,
-                  iconColor: transaction.category.color ?? Colors.grey,
-                  title: transaction.category.name,
-                  date: transaction.date.toString(),
-                  user: 'Tu',
-                  amount: transaction.amount.toString(),
-                  amountColor: transaction.category.type == CategoryType.expense
-                      ? Colors.red
-                      : Colors.green,
-                  isPrivate: transaction.isPrivate,
-                );
-              },
-            ),
-          ],
-        );
-      },
+  Widget _buildTransactionList(TransactionState state) {
+    return Column(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: state.transactions.length,
+          itemBuilder: (BuildContext context, int index) {
+            final transaction = state.transactions[index];
+            return TransactionItem(
+              icon: transaction.category.icon,
+              iconColor: transaction.category.color ?? Colors.grey,
+              title: transaction.category.name,
+              date: transaction.date.toString(),
+              user: 'Tu',
+              amount: NumberFormat(
+                "#,##0.00",
+                "en_US",
+              ).format(transaction.amount),
+              amountColor: transaction.category.type == CategoryType.expense
+                  ? Colors.red
+                  : Colors.green,
+              isPrivate: transaction.isPrivate,
+            );
+          },
+        ),
+      ],
     );
   }
 }

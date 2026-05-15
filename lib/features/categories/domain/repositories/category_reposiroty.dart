@@ -11,7 +11,7 @@ abstract class CategoryRepository {
   // );
 
   // Guardar una nueva categoría (Sincronizará local y remoto luego)
-  Future<void> saveCategory(Category category);
-  Future<List<Category>> getCategories();
+  Future<void> saveCategory(CategoryEntity category);
+  Future<List<CategoryEntity>> getCategories();
   Future<void> deleteCategory(String name);
 }

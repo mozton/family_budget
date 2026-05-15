@@ -1,3 +1,4 @@
+import 'package:family_budget/core/widgets/custom_type_selector.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
 
 class NewCategoryScreen extends StatefulWidget {
   final String type;
@@ -18,11 +20,13 @@ class NewCategoryScreen extends StatefulWidget {
 class _NewCategoryScreenState extends State<NewCategoryScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
+  final TextEditingController limitController = TextEditingController();
 
   late IconData selectedIcon;
 
   final List<IconData> availableIcons = [
     TablerIcons.shopping_cart,
+    TablerIcons.shopping_bag,
     TablerIcons.home,
     TablerIcons.car,
     TablerIcons.heart,
@@ -51,10 +55,83 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
     TablerIcons.credit_card,
     TablerIcons.gift,
     TablerIcons.pig_money,
+
+    // Nuevos iconos para Budget Family
+    TablerIcons.wallet,
+    TablerIcons.wallet_off,
+    TablerIcons.coin,
+    TablerIcons.coins,
+    TablerIcons.receipt,
+    TablerIcons.receipt_tax,
+    TablerIcons.report_money,
+    TablerIcons.chart_bar,
+    TablerIcons.chart_pie,
+    TablerIcons.chart_line,
+    TablerIcons.trending_up,
+    TablerIcons.trending_down,
+    TablerIcons.calculator,
+    TablerIcons.percentage,
+
+    TablerIcons.building_bank,
+    TablerIcons.users,
+    TablerIcons.user_heart,
+    TablerIcons.baby_carriage,
+    TablerIcons.dog,
+    TablerIcons.cat,
+    TablerIcons.stethoscope,
+    TablerIcons.medicine_syrup,
+    TablerIcons.dental,
+    TablerIcons.ambulance,
+    TablerIcons.flame,
+    TablerIcons.bolt,
+    TablerIcons.device_tv,
+    TablerIcons.wifi,
+    TablerIcons.phone,
+    TablerIcons.devices_pc,
+    TablerIcons.smart_home,
+    TablerIcons.router,
+    TablerIcons.movie,
+    TablerIcons.music,
+    TablerIcons.book,
+    TablerIcons.run,
+    TablerIcons.barbell,
+    TablerIcons.basket,
+    TablerIcons.chef_hat,
+    TablerIcons.tools_kitchen_2,
+    TablerIcons.ice_cream_2,
+    TablerIcons.pizza,
+    TablerIcons.apple,
+    TablerIcons.salad,
+
+    TablerIcons.train,
+    TablerIcons.bike,
+    TablerIcons.motorbike,
+    TablerIcons.map_pin,
+    TablerIcons.package,
+    TablerIcons.box,
+    TablerIcons.clipboard_list,
+    TablerIcons.calendar_month,
+    TablerIcons.clock,
+    TablerIcons.alarm,
+    TablerIcons.camera,
+    TablerIcons.device_mobile,
+    TablerIcons.sofa,
+    TablerIcons.wash_machine,
+    TablerIcons.air_conditioning,
+    TablerIcons.paint,
+    TablerIcons.hammer,
+
+    TablerIcons.brand_apple,
+    TablerIcons.brand_spotify,
+    TablerIcons.brand_netflix,
+    TablerIcons.brand_amazon,
+    TablerIcons.brand_paypal,
+    TablerIcons.brand_visa,
+    TablerIcons.brand_mastercard,
+    TablerIcons.brand_tether,
   ];
 
   bool isPrivate = false;
-
   final List<Color> colors = [
     Color(0xFF9333EA),
     Color(0xFFFF6B6B),
@@ -68,6 +145,28 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
     Color(0xFFE63946),
     Color(0xFFF4A261),
     Color(0xFF10B981),
+
+    // Nuevos colores
+    Color(0xFF7C3AED), // violeta intenso
+    Color(0xFFFF8FAB), // rosado suave
+    Color(0xFF00C2A8), // turquesa vivo
+    Color(0xFFFFC75F), // amarillo cálido
+    Color(0xFF3A86FF), // azul brillante
+    Color(0xFF8338EC), // púrpura eléctrico
+    Color(0xFFFF006E), // magenta fuerte
+    Color(0xFF06D6A0), // verde aqua
+    Color(0xFFFFBE0B), // amarillo dorado
+    Color(0xFF118AB2), // azul océano
+    Color(0xFFEF476F), // coral rosado
+    Color(0xFF73C2FB), // azul cielo
+    Color(0xFF52B788), // verde moderno
+    Color(0xFFFF7F50), // coral
+    Color(0xFF9D4EDD), // lila vibrante
+    Color(0xFF2EC4B6), // aqua pastel
+    Color(0xFFFF595E), // rojo suave
+    Color(0xFF8AC926), // verde lima
+    Color(0xFF1982C4), // azul limpio
+    Color(0xFFC77DFF), // púrpura pastel
   ];
 
   late Color colorSelected;
@@ -116,9 +215,16 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                   const SizedBox(height: 20),
                   _buildCustomTextField(
                     "Nombre de la categoría",
-                    "Ej. Mascotas",
+                    "Ej. Compras",
                     titleController,
                   ),
+                  const SizedBox(height: 20),
+                  _buildCustomCurrencyField(
+                    "Presupuesto de la categoría",
+                    "Ej. 5000",
+                    limitController,
+                  ),
+
                   const SizedBox(height: 20),
                   _buildIconSelector(context),
                   const SizedBox(height: 30),
@@ -190,8 +296,9 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
   void _showIconPicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      // isScrollControlled: true,
       builder: (context) {
         return Container(
           height: MediaQuery.of(context).size.height * .8,
@@ -200,29 +307,28 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                Text(
-                  "Selecciona un icono",
-                  style: GoogleFonts.quicksand(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1F2937),
-                  ),
+              ),
+              Text(
+                "Selecciona un icono",
+                style: GoogleFonts.quicksand(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1F2937),
                 ),
-                const SizedBox(height: 24),
-                GridView.builder(
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: GridView.builder(
                   shrinkWrap: true,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
@@ -256,9 +362,9 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
         );
       },
@@ -305,54 +411,185 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
     );
   }
 
-  Widget _buildColorPicker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "COLOR DE LA CATEGORÍA".toUpperCase(),
-          style: GoogleFonts.quicksand(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[500],
+  Widget _buildCustomCurrencyField(
+    String label,
+    String hint,
+    TextEditingController controller,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: GoogleFonts.quicksand(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[500],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: colors.map((color) {
-            final isSelected = colorSelected == color;
-            return GestureDetector(
-              onTap: () => setState(() => colorSelected = color),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: isSelected
-                      ? Border.all(color: Colors.grey[300]!, width: 3)
-                      : null,
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: color.withValues(alpha: .4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white, size: 24)
-                    : null,
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: GoogleFonts.quicksand(
+                color: Colors.grey[400],
+                fontWeight: FontWeight.w600,
               ),
-            );
-          }).toList(),
-        ),
-      ],
+              border: InputBorder.none,
+              isDense: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget _buildColorPicker() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         "COLOR DE LA CATEGORÍA".toUpperCase(),
+  //         style: GoogleFonts.quicksand(
+  //           fontSize: 10,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.grey[500],
+  //         ),
+  //       ),
+  //       const SizedBox(height: 16),
+  //       Wrap(
+  //         spacing: 16,
+  //         runSpacing: 16,
+  //         children: colors.map((color) {
+  //           final isSelected = colorSelected == color;
+  //           return GestureDetector(
+  //             onTap: () => setState(() => colorSelected = color),
+  //             child: AnimatedContainer(
+  //               duration: const Duration(milliseconds: 200),
+  //               width: 44,
+  //               height: 44,
+  //               decoration: BoxDecoration(
+  //                 color: color,
+  //                 shape: BoxShape.circle,
+  //                 border: isSelected
+  //                     ? Border.all(color: Colors.grey[300]!, width: 3)
+  //                     : null,
+  //                 boxShadow: isSelected
+  //                     ? [
+  //                         BoxShadow(
+  //                           color: color.withValues(alpha: .4),
+  //                           blurRadius: 8,
+  //                           offset: const Offset(0, 4),
+  //                         ),
+  //                       ]
+  //                     : [],
+  //               ),
+  //               child: isSelected
+  //                   ? const Icon(Icons.check, color: Colors.white, size: 24)
+  //                   : null,
+  //             ),
+  //           );
+  //         }).toList(),
+  //       ),
+  //     ],
+  //   );
+  // }
+  Widget _buildColorPicker() {
+    return Container(
+      padding: const EdgeInsets.only(top: 16, bottom: 16, left: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "COLOR DE LA CATEGORÍA",
+            style: GoogleFonts.quicksand(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[500],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 100,
+            width: double.infinity,
+            child: ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.transparent,
+                    Colors.grey,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.05, 0.95, 1.0],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: GridView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: colors.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                ),
+                itemBuilder: (context, index) {
+                  final color = colors[index];
+                  final isSelected = colorSelected == color;
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => colorSelected = color);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 25,
+                      height: 25,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        border: isSelected
+                            ? Border.all(color: Colors.grey[300]!, width: 3)
+                            : null,
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: color.withValues(alpha: .4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: isSelected
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 24,
+                            )
+                          : null,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -369,57 +606,17 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            children: [
-              _buildTypeOption("Gasto", 'expense'),
-              _buildTypeOption("Ingreso", 'income'),
-            ],
-          ),
+        CustomTypeSelector(
+          isLeftSelected: typeSelected == 'expense',
+          leftLabel: "Gasto",
+          rightLabel: "Ingreso",
+          onChanged: (isLeft) {
+            setState(() {
+              typeSelected = isLeft ? 'expense' : 'income';
+            });
+          },
         ),
       ],
-    );
-  }
-
-  Widget _buildTypeOption(String label, String type) {
-    bool active = typeSelected == type;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => typeSelected = type),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: active
-                ? typeSelected == 'expense'
-                      ? const Color(0xFFFF6B6B).withValues(alpha: .3)
-                      : const Color(0xFF48BB78).withValues(alpha: .3)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: active
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .05),
-                      blurRadius: 10,
-                    ),
-                  ]
-                : [],
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.quicksand(
-              fontWeight: FontWeight.bold,
-              color: active ? const Color(0xFF1F2937) : Colors.grey[400],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -440,12 +637,20 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
       ),
       child: ElevatedButton(
         onPressed: () {
+          final uuid = Uuid().v4();
+
           final newCategory = CreateCategory(
             name: titleController.text,
             icon: selectedIcon,
             color: colorSelected,
             type: typeSelected,
+            currentAmount: 0,
+            remoteId: uuid,
+            targetAmount: limitController.text.isNotEmpty
+                ? double.parse(limitController.text)
+                : 0,
           );
+
           context.read<CategoryBloc>().add(newCategory);
 
           Navigator.pop(context);

@@ -1,10 +1,13 @@
+import 'package:family_budget/core/widgets/custom_type_selector.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_item.dart';
-import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_bloc.dart';
-import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_event.dart';
+import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
+import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
+
+import 'package:family_budget/features/transactions/presentation/widgets/private_toggle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -71,18 +74,16 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                 children: [
                   const SizedBox(height: 20),
                   // Toggle Gasto/Ingreso
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        _buildTypeButton("Gasto", 'expense'),
-                        _buildTypeButton("Ingreso", 'income'),
-                      ],
-                    ),
+                  CustomTypeSelector(
+                    isLeftSelected: isExpense,
+                    leftLabel: "Gasto",
+                    rightLabel: "Ingreso",
+                    onChanged: (isLeft) {
+                      setState(() {
+                        isExpense = isLeft;
+                        selectedCategoryName = null;
+                      });
+                    },
                   ),
                   const SizedBox(height: 40),
                   // Input de Monto
@@ -181,7 +182,10 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                   _buildCustomTextField("Nota", "¿En qué lo usaste?"),
                   const SizedBox(height: 20),
                   // Toggle Privado
-                  _buildPrivateToggle(),
+                  PrivateToggle(
+                    isPrivate: isPrivate,
+                    onPrivateChanged: (v) => setState(() => isPrivate = v),
+                  ),
                   const SizedBox(height: 40),
                   // Botón Registrar
                   _buildSubmitButton(context, filteredCategories),
@@ -286,50 +290,6 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     );
   }
 
-  Widget _buildTypeButton(String label, String type) {
-    const expense = 'expense';
-    const income = 'income';
-    bool active =
-        (isExpense && type == expense) || (!isExpense && type == income);
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          bool newIsExpense = type == expense;
-          if (isExpense != newIsExpense) {
-            setState(() {
-              isExpense = newIsExpense;
-              selectedCategoryName = null;
-            });
-          }
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: active ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: active
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .05),
-                      blurRadius: 10,
-                    ),
-                  ]
-                : [],
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.quicksand(
-              fontWeight: FontWeight.bold,
-              color: active ? const Color(0xFF1F2937) : Colors.grey[400],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildAddCategoryButton(BuildContext context) {
     return Column(
       children: [
@@ -407,65 +367,10 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     );
   }
 
-  Widget _buildPrivateToggle() {
-    return GestureDetector(
-      onTap: () {
-        setState(() => isPrivate = !isPrivate);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isPrivate
-              ? primaryPurple.withValues(alpha: .05)
-              : Colors.grey[50],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isPrivate
-                ? primaryPurple.withValues(alpha: .05)
-                : Colors.grey[100]!,
-          ),
-        ),
-        child: Row(
-          children: [
-            Text(isPrivate ? '🔒' : '🔓', style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Gasto Privado",
-                    style: GoogleFonts.quicksand(
-                      fontWeight: FontWeight.bold,
-                      color: isPrivate ? primaryPurple : Colors.grey[700],
-                    ),
-                  ),
-                  Text(
-                    "Solo tú verás este detalle",
-                    style: GoogleFonts.quicksand(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[500],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Switch(
-              value: isPrivate,
-              onChanged: (v) {
-                setState(() => isPrivate = v);
-              },
-              activeThumbColor: primaryPurple,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton(BuildContext context, List<Category> categories) {
+  Widget _buildSubmitButton(
+    BuildContext context,
+    List<CategoryEntity> categories,
+  ) {
     return Container(
       width: double.infinity,
       height: 60,
@@ -504,11 +409,17 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
             note: noteController.text,
             date: DateTime.now(),
             isPrivate: isPrivate,
-            category: Category(
+            category: CategoryEntity(
               name: selectedCategory.name,
               icon: selectedIcon!,
               color: selectedColor!,
               type: isExpense ? CategoryType.expense : CategoryType.income,
+              id: selectedCategory.id,
+              currentAmount:
+                  double.parse(amountController.text) +
+                  selectedCategory.currentAmount,
+              targetAmount: 0,
+              remoteId: selectedCategory.remoteId,
             ),
             type: isExpense ? CategoryType.expense : CategoryType.income,
           );

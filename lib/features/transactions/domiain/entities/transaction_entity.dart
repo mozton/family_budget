@@ -1,7 +1,9 @@
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 
+enum TransactionType { income, expense }
+
 class Transaction {
-  final Category category;
+  final CategoryEntity category;
   final double amount;
   final String note;
   final bool isPrivate;

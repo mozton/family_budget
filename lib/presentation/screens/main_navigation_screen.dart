@@ -1,9 +1,11 @@
 import 'package:family_budget/presentation/screens/dream_screen.dart';
+
 import 'package:family_budget/presentation/screens/home_screen.dart';
 import 'package:family_budget/presentation/screens/list_screen.dart';
-import 'package:family_budget/features/trasnsactions/presentation/screens/new_entry_screen.dart';
+import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/presentation/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -59,28 +61,28 @@ class _MainNavigationState extends State<MainNavigation> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            _buildNavItem('assets/home.png', "Inicio", 0),
-            _buildNavItem('assets/list.png', "Movimientos", 1),
+            _buildNavItem(TablerIcons.home, "Inicio", 0),
+            _buildNavItem(TablerIcons.list, "Movimientos", 1),
             const SizedBox(width: 40),
-            _buildNavItem('assets/clock.png', "Metas", 2),
-            _buildNavItem('assets/user.png', "Perfil", 3),
+            _buildNavItem(TablerIcons.clock, "Metas", 2),
+            _buildNavItem(TablerIcons.user, "Perfil", 3),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(String assetName, String label, int index) {
+  Widget _buildNavItem(IconData icon, String label, int index) {
     bool isSelected = _selectedIndex == index;
     return InkWell(
       onTap: () => _onItemTapped(index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image(
-            image: AssetImage(assetName),
-            width: 28,
-            height: 28,
+          Icon(
+            icon,
+            size: 28,
+
             color: isSelected ? const Color(0xFF9333EA) : Colors.grey[300],
           ),
           Text(

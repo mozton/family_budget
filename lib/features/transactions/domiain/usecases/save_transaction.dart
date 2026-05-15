@@ -1,5 +1,5 @@
-import 'package:family_budget/features/trasnsactions/domiain/entities/transaction_entity.dart';
-import 'package:family_budget/features/trasnsactions/domiain/repositories/transaction_repository.dart';
+import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
+import 'package:family_budget/features/transactions/domiain/repositories/transaction_repository.dart';
 
 class SaveTransaction {
   final TransactionRepository repository;

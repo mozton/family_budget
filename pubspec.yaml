@@ -43,6 +43,8 @@ dependencies:
   bloc: ^9.2.0
   path_provider: ^2.1.5
   flutter_tabler_icons: ^1.43.0
+  intl: ^0.20.2
+  uuid: ^4.5.3
 
 dev_dependencies:
   flutter_test:
@@ -62,15 +64,14 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - assets/
+  # assets:
+  #   - assets/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

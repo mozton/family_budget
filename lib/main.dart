@@ -1,32 +1,61 @@
+import 'package:family_budget/features/categories/data/datasources/category_local_datasource_impl.dart';
 import 'package:family_budget/features/categories/data/repository/category_repository_imp.dart';
 import 'package:family_budget/features/categories/domain/usercases/get_category.dart';
 import 'package:family_budget/features/categories/domain/usercases/save_category.dart';
 import 'package:family_budget/features/categories/domain/usercases/delete_category.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
-import 'package:family_budget/features/trasnsactions/data/repository/transaction_repository_impl.dart';
-import 'package:family_budget/features/trasnsactions/domiain/usecases/save_transaction.dart' as trans;
-import 'package:family_budget/features/trasnsactions/presentation/bloc/transaction_bloc.dart';
+import 'package:family_budget/features/transactions/data/repository/transaction_repository_impl.dart';
+import 'package:family_budget/features/transactions/domiain/usecases/save_transaction.dart'
+    as trans;
+import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
 import 'package:family_budget/presentation/screens/budget_screen.dart';
 import 'package:family_budget/presentation/screens/dream_screen.dart';
 import 'package:family_budget/presentation/screens/list_screen.dart';
 import 'package:family_budget/presentation/screens/main_navigation_screen.dart';
-import 'package:family_budget/features/trasnsactions/presentation/screens/new_entry_screen.dart';
+import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/presentation/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:path_provider/path_provider.dart'; // Necesario para Isar
+import 'package:isar/isar.dart';
+import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
+
+// ... (tus otros imports) ...
+
 void main() async {
+  // 1. Asegurar que los bindings de Flutter estén listos
   WidgetsFlutterBinding.ensureInitialized();
-  final categoryRepository = CategoryRepositoryFake();
+
+  // 2. INICIALIZAR ISAR (La base de datos real)
+  final dir = await getApplicationDocumentsDirectory();
+  final isar = await Isar.open(
+    [CategoryIsarModelSchema], // Aquí pones los schemas que generaste
+    directory: dir.path,
+  );
+
+  // 3. INYECTAR DATA SOURCE (Pasamos la instancia de Isar)
+  // Aquí usamos la implementación (Impl), no la interfaz.
+  final categoryLocalDataSource = CategoryLocalDataSourceImpl(isar: isar);
+
+  // 4. INYECTAR REPOSITORIO (Pasamos la instancia del DataSource)
+  final categoryRepository = CategoryRepositoryImpl(
+    categoryLocalDataSource: categoryLocalDataSource,
+  );
+
+  // 5. INYECTAR CASOS DE USO (Pasamos el Repositorio)
   final saveCategoryUseCase = SaveCategory(categoryRepository);
   final getCategoriesUseCase = GetCategories(categoryRepository);
   final deleteCategoryUseCase = DeleteCategory(categoryRepository);
 
+  // (Tus mocks temporales de transacciones)
   final transactionRepository = TransactionRepositoryFake();
   final saveTransactionUseCase = trans.SaveTransaction(transactionRepository);
 
+  // 6. CORRER LA APP
   runApp(
     MultiBlocProvider(
       providers: [
@@ -36,11 +65,9 @@ void main() async {
             saveCategoryUseCase,
             getCategoriesUseCase,
             deleteCategoryUseCase,
-          ),
+          )..add(LoadCategories()),
         ),
-        BlocProvider(
-          create: (_) => TransactionBloc(saveTransactionUseCase),
-        ),
+        BlocProvider(create: (_) => TransactionBloc(saveTransactionUseCase)),
       ],
       child: const MyApp(),
     ),
@@ -68,7 +95,8 @@ class MyApp extends StatelessWidget {
         '/history': (context) => const HistoryScreen(),
         '/dreams': (context) => const DreamsScreen(),
         '/profile': (context) => const ProfileScreen(),
-        '/budget_screenm': (context) => const BudgetPage(),
+        // Corregido: de '/budget_screenm' a '/budget_screen'
+        '/budget_screen': (context) => const BudgetPage(),
       },
     );
   }
