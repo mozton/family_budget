@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 30),
                   _buildRecentActivityHeader(),
                   const SizedBox(height: 20),
-                  _buildTransactionList(state),
+                  _buildTransactionList(),
                 ],
               ),
             ),
@@ -302,29 +302,50 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionList(TransactionState state) {
+  Widget _buildTransactionList() {
     return Column(
       children: [
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: state.transactions.length,
-          itemBuilder: (BuildContext context, int index) {
-            final transaction = state.transactions[index];
-            return TransactionItem(
-              icon: transaction.category.icon,
-              iconColor: transaction.category.color ?? Colors.grey,
-              title: transaction.category.name,
-              date: transaction.date.toString(),
-              user: 'Tu',
-              amount: NumberFormat(
-                "#,##0.00",
-                "en_US",
-              ).format(transaction.amount),
-              amountColor: transaction.category.type == CategoryType.expense
-                  ? Colors.red
-                  : Colors.green,
-              isPrivate: transaction.isPrivate,
+        BlocBuilder<TransactionBloc, TransactionState>(
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (state.transactions.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  "Aún no tienes transacciones.",
+                  style: GoogleFonts.quicksand(color: Colors.grey),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: state.transactions.length,
+              itemBuilder: (BuildContext context, int index) {
+                final transaction = state.transactions[index];
+                return TransactionItem(
+                  icon: transaction.category.icon,
+                  iconColor: transaction.category.color ?? Colors.grey,
+                  title: transaction.category.name,
+                  date: transaction.date.toString(),
+                  user: 'Tu',
+                  amount: NumberFormat(
+                    "#,##0.00",
+                    "en_US",
+                  ).format(transaction.amount),
+                  amountColor: transaction.type == CategoryType.expense
+                      ? Colors.red
+                      : Colors.green,
+                  isPrivate: transaction.isPrivate,
+                );
+              },
             );
           },
         ),

@@ -1,5 +1,4 @@
 import 'package:family_budget/features/categories/data/datasources/category_local_datasource.dart';
-import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
 import 'package:family_budget/features/categories/data/models/category_mapper.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/domain/repositories/category_reposiroty.dart';

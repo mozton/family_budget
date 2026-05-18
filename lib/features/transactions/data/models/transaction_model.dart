@@ -1,11 +1,14 @@
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
-class TransactionModel extends Transaction {
+class TransactionModel extends TransactionEntity {
   TransactionModel({
+    super.id,
+    super.remoteId,
     required super.category,
     required super.amount,
     required super.note,
     required super.isPrivate,
+    super.ownerId = '',
     required super.date,
     required super.type,
   });

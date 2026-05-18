@@ -403,27 +403,27 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
           final selectedCategory = categories.firstWhere(
             (c) => c.name == selectedCategoryName,
           );
-
-          final transactionEvent = AddTransactionEvent(
-            amount: double.tryParse(amountController.text) ?? 0.0,
-            note: noteController.text,
-            date: DateTime.now(),
-            isPrivate: isPrivate,
-            category: CategoryEntity(
-              name: selectedCategory.name,
-              icon: selectedIcon!,
-              color: selectedColor!,
+          context.read<TransactionBloc>().add(
+            AddTransactionEvent(
+              amount: double.tryParse(amountController.text) ?? 0.0,
+              note: noteController.text,
+              date: DateTime.now(),
+              isPrivate: isPrivate,
+              category: CategoryEntity(
+                name: selectedCategory.name,
+                icon: selectedIcon!,
+                color: selectedColor!,
+                type: isExpense ? CategoryType.expense : CategoryType.income,
+                id: selectedCategory.id,
+                currentAmount:
+                    double.parse(amountController.text) +
+                    selectedCategory.currentAmount,
+                targetAmount: 0,
+                remoteId: selectedCategory.remoteId,
+              ),
               type: isExpense ? CategoryType.expense : CategoryType.income,
-              id: selectedCategory.id,
-              currentAmount:
-                  double.parse(amountController.text) +
-                  selectedCategory.currentAmount,
-              targetAmount: 0,
-              remoteId: selectedCategory.remoteId,
             ),
-            type: isExpense ? CategoryType.expense : CategoryType.income,
           );
-          context.read<TransactionBloc>().add(transactionEvent);
           Navigator.pop(context);
         },
         style: ElevatedButton.styleFrom(

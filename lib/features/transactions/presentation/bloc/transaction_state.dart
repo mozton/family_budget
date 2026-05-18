@@ -2,7 +2,7 @@ import 'package:family_budget/features/categories/domain/entities/category_entit
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
 class TransactionState {
-  final List<Transaction> transactions;
+  final List<TransactionEntity> transactions;
   final double initialBalance;
   final bool isLoading;
   final bool isError;

@@ -23,6 +23,12 @@ class BudgetPage extends StatelessWidget {
         final categories = state.categories
             .where((e) => e.type == CategoryType.expense)
             .toList();
+        double categoryTotalLimit = 0;
+        for (var e in categories) {
+          if (e.type == CategoryType.expense) {
+            categoryTotalLimit += e.targetAmount ?? 0;
+          }
+        }
         return Scaffold(
           backgroundColor: background,
           body: SafeArea(
@@ -34,7 +40,7 @@ class BudgetPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   _buildHeader(),
                   const SizedBox(height: 30),
-                  _buildSummaryCard(10, 9, 0.3),
+                  _buildSummaryCard(10, categoryTotalLimit, 0.3),
                   const SizedBox(height: 30),
                   _buildSectionTitle(),
                   const SizedBox(height: 20),
@@ -155,7 +161,7 @@ class BudgetPage extends StatelessWidget {
                     style: GoogleFonts.quicksand(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[400],
+                      color: Colors.grey[500],
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -174,7 +180,7 @@ class BudgetPage extends StatelessWidget {
                 style: GoogleFonts.quicksand(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[300],
+                  color: Colors.grey[500],
                 ),
               ),
             ],

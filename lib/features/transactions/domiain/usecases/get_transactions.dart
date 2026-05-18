@@ -1,12 +1,12 @@
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:family_budget/features/transactions/domiain/repositories/transaction_repository.dart';
 
-class SaveTransaction {
+class GetTransactionsUsecase {
   final TransactionRepository repository;
 
-  SaveTransaction(this.repository);
+  GetTransactionsUsecase(this.repository);
 
-  Future<void> saveTransaction(TransactionEntity transaction) async {
-    await repository.saveTransaction(transaction);
+  Future<List<TransactionEntity>> getTransactions() {
+    return repository.getTransactions();
   }
 }

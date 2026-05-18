@@ -7,22 +7,26 @@ import 'package:family_budget/features/categories/presentation/bloc/category_blo
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/transactions/data/repository/transaction_repository_impl.dart';
+import 'package:family_budget/features/transactions/domiain/usecases/get_transactions.dart';
 import 'package:family_budget/features/transactions/domiain/usecases/save_transaction.dart'
     as trans;
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
+import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/presentation/screens/budget_screen.dart';
 import 'package:family_budget/presentation/screens/dream_screen.dart';
 import 'package:family_budget/presentation/screens/list_screen.dart';
-import 'package:family_budget/presentation/screens/main_navigation_screen.dart';
+import 'package:family_budget/features/main_navigation/presentation/pages/main_navigation_screen.dart';
 import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
-import 'package:family_budget/presentation/screens/profile_screen.dart';
+import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:path_provider/path_provider.dart'; // Necesario para Isar
 import 'package:isar/isar.dart';
 import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
+import 'package:family_budget/features/transactions/data/models/transaction_isar_model.dart';
+import 'package:family_budget/features/transactions/data/datasources/transaction_local_datasource_impl.dart';
 
 // ... (tus otros imports) ...
 
@@ -33,7 +37,10 @@ void main() async {
   // 2. INICIALIZAR ISAR (La base de datos real)
   final dir = await getApplicationDocumentsDirectory();
   final isar = await Isar.open(
-    [CategoryIsarModelSchema], // Aquí pones los schemas que generaste
+    [
+      CategoryIsarModelSchema,
+      TransactionIsarModelSchema,
+    ], // Aquí pones los schemas que generaste
     directory: dir.path,
   );
 
@@ -51,9 +58,13 @@ void main() async {
   final getCategoriesUseCase = GetCategories(categoryRepository);
   final deleteCategoryUseCase = DeleteCategory(categoryRepository);
 
-  // (Tus mocks temporales de transacciones)
-  final transactionRepository = TransactionRepositoryFake();
+  // (Inyección real de transacciones)
+  final transactionLocalDataSource = TransactionLocalDataSourceImpl(isar: isar);
+  final transactionRepository = TransactionRepositoryImpl(
+    localDataSource: transactionLocalDataSource,
+  );
   final saveTransactionUseCase = trans.SaveTransaction(transactionRepository);
+  final getTransactionsUseCase = GetTransactionsUsecase(transactionRepository);
 
   // 6. CORRER LA APP
   runApp(
@@ -67,7 +78,11 @@ void main() async {
             deleteCategoryUseCase,
           )..add(LoadCategories()),
         ),
-        BlocProvider(create: (_) => TransactionBloc(saveTransactionUseCase)),
+        BlocProvider(
+          create: (_) =>
+              TransactionBloc(saveTransactionUseCase, getTransactionsUseCase)
+                ..add(GetTransactionsEvent()),
+        ),
       ],
       child: const MyApp(),
     ),

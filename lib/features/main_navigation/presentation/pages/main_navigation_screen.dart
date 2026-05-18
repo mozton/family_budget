@@ -3,7 +3,7 @@ import 'package:family_budget/presentation/screens/dream_screen.dart';
 import 'package:family_budget/presentation/screens/home_screen.dart';
 import 'package:family_budget/presentation/screens/list_screen.dart';
 import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
-import 'package:family_budget/presentation/screens/profile_screen.dart';
+import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
@@ -19,10 +19,10 @@ class _MainNavigationState extends State<MainNavigation> {
 
   // Lista de pantallas principales
   final List<Widget> _screens = [
-    const HomeScreen(), // La que ya hicimos
-    const HistoryScreen(), // Nueva
-    const DreamsScreen(), // Nueva
-    const ProfileScreen(), // Nueva
+    const HomeScreen(),
+    const HistoryScreen(),
+    const DreamsScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -35,7 +35,6 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: _screens),
-      // Botón Flotante Central para "Nueva Entrada"
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

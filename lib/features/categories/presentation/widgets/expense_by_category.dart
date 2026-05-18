@@ -31,7 +31,7 @@ class ExpenseByCategory extends StatelessWidget {
   Widget build(BuildContext context) {
     final transactionsBloc = context.read<TransactionBloc>().state;
     final transactionsList = transactionsBloc.transactions;
-    var categoryTransactions = transactionsList
+    final categoryTransactions = transactionsList
         .where((e) => e.category.name == name)
         .toList();
     double categorySpent = 0;
@@ -107,7 +107,7 @@ class ExpenseByCategory extends StatelessWidget {
                           style: GoogleFonts.quicksand(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: isOver ? Colors.red[400] : Colors.grey[400],
+                            color: isOver ? Colors.red[400] : Colors.grey[500],
                           ),
                         ),
                       ],
@@ -130,7 +130,7 @@ class ExpenseByCategory extends StatelessWidget {
                         style: GoogleFonts.quicksand(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[300],
+                          color: Colors.grey[500],
                         ),
                       ),
                     ],
@@ -149,7 +149,7 @@ class ExpenseByCategory extends StatelessWidget {
                     ),
                   ),
                   FractionallySizedBox(
-                    widthFactor: spent / limit,
+                    widthFactor: 0.0,
                     child: Container(
                       height: 6,
                       decoration: BoxDecoration(
