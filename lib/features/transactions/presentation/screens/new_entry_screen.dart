@@ -3,6 +3,7 @@ import 'package:family_budget/features/categories/domain/entities/category_entit
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
+import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_item.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
@@ -10,6 +11,7 @@ import 'package:family_budget/features/transactions/presentation/bloc/transactio
 import 'package:family_budget/features/transactions/presentation/widgets/private_toggle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 
@@ -56,7 +58,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey),
+                icon: const Icon(TablerIcons.arrow_back, color: Colors.grey),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Text(
@@ -200,91 +202,110 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
   }
 
   void _showDeleteCategoryDialog(BuildContext context, String categoryName) {
+    final size = MediaQuery.of(context).size;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
+        return Stack(
+          children: [
+            Container(
+              height: MediaQuery.of(context).size.height * 0.33,
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
-              const SizedBox(height: 24),
-              Text(
-                "¿Eliminar categoría?",
-                style: GoogleFonts.quicksand(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "Se eliminará '$categoryName'. Esta acción no se puede deshacer.",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.quicksand(
-                  color: Colors.grey[500],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        "Cancelar",
-                        style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[500],
-                        ),
-                      ),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.read<CategoryBloc>().add(
-                          DeleteCategoryEvent(categoryName),
-                        );
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: expenseRed,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        "Eliminar",
-                        style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "¿Qué quieres hacer?",
+                    style: GoogleFonts.quicksand(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Si editas la categoría, se actualizará en todas las transacciones relacionadas. Si la eliminas, se eliminará en todas las transacciones relacionadas.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.quicksand(
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "Editar categoría",
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context.read<CategoryBloc>().add(
+                              DeleteCategoryEvent(categoryName),
+                            );
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: expenseRed,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            "Eliminar",
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            ),
+            Positioned(
+              right: size.width * 0.02,
+              top: size.height * 0.015,
+              child: IconButton(
+                icon: Icon(
+                  TablerIcons.square_rounded_x,
+                  color: Colors.grey,
+                  weight: 1,
+
+                  size: size.height * 0.028,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -300,7 +321,11 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
             Navigator.pushNamed(
               context,
               '/new_category',
-              arguments: isExpense ? expense : income,
+              arguments: {
+                'type': isExpense ? expense : income,
+                'title': 'Nueva Categoría',
+                'action': 'Guardar Categoría',
+              },
             );
           },
           child: Container(

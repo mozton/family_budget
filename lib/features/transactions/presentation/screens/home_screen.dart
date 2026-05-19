@@ -1,7 +1,6 @@
-import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
+import 'package:family_budget/core/widgets/transaction_list.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_state.dart';
-import 'package:family_budget/features/transactions/presentation/widgets/transaction_item.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,7 +37,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 30),
                   _buildRecentActivityHeader(),
                   const SizedBox(height: 20),
-                  _buildTransactionList(),
+                  const TransactionListWidget(),
                 ],
               ),
             ),
@@ -297,57 +296,6 @@ class HomeScreen extends StatelessWidget {
             color: primaryPurple,
             letterSpacing: 0.5,
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTransactionList() {
-    return Column(
-      children: [
-        BlocBuilder<TransactionBloc, TransactionState>(
-          builder: (context, state) {
-            if (state.isLoading) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (state.transactions.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Text(
-                  "Aún no tienes transacciones.",
-                  style: GoogleFonts.quicksand(color: Colors.grey),
-                ),
-              );
-            }
-
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: state.transactions.length,
-              itemBuilder: (BuildContext context, int index) {
-                final transaction = state.transactions[index];
-                return TransactionItem(
-                  icon: transaction.category.icon,
-                  iconColor: transaction.category.color ?? Colors.grey,
-                  title: transaction.category.name,
-                  date: transaction.date.toString(),
-                  user: 'Tu',
-                  amount: NumberFormat(
-                    "#,##0.00",
-                    "en_US",
-                  ).format(transaction.amount),
-                  amountColor: transaction.type == CategoryType.expense
-                      ? Colors.red
-                      : Colors.green,
-                  isPrivate: transaction.isPrivate,
-                );
-              },
-            );
-          },
         ),
       ],
     );

@@ -65,11 +65,7 @@ class BudgetPage extends StatelessWidget {
                                   category.currentAmount.toString(),
                                 ) >
                                 double.parse(category.targetAmount.toString()),
-                            percent:
-                                double.parse(
-                                  category.currentAmount.toString(),
-                                ) /
-                                double.parse(category.targetAmount.toString()),
+
                             color: category.color ?? Colors.pink,
                             icon: category.icon,
                             name: category.name,

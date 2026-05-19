@@ -22,4 +22,9 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<void> deleteCategory(String name) async {
     await categoryLocalDataSource.deleteCategory(name);
   }
+
+  @override
+  Future<CategoryEntity> updateCategory(CategoryEntity category) async {
+    return await categoryLocalDataSource.updateCategory(category.toIsarModel());
+  }
 }

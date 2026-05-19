@@ -59,8 +59,6 @@ extension TransactionEntityMapper on TransactionEntity {
     if (remoteId.isNotEmpty) {
       model.remoteId = remoteId;
     } else if (model.remoteId == null || model.remoteId!.isEmpty) {
-      // Isar no permite múltiples nulls en campos unique.
-      // Si no tenemos remoteId, generamos un UUID para evitar Unique Constraint Violation.
       model.remoteId = const Uuid().v4();
     }
 

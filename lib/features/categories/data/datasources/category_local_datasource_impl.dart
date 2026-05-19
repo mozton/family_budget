@@ -59,4 +59,12 @@ class CategoryLocalDataSourceImpl implements CategoryLocalDataSource {
       await isar.categoryIsarModels.put(category);
     });
   }
+
+  @override
+  Future<CategoryIsarModel> updateCategory(CategoryIsarModel category) async {
+    await isar.writeTxn(() async {
+      await isar.categoryIsarModels.put(category);
+    });
+    return category;
+  }
 }

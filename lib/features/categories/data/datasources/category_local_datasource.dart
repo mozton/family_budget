@@ -5,4 +5,5 @@ abstract class CategoryLocalDataSource {
   Future<CategoryIsarModel> getCategory(String id);
   Future<void> saveCategory(CategoryIsarModel category);
   Future<void> deleteCategory(String id);
+  Future updateCategory(CategoryIsarModel category);
 }

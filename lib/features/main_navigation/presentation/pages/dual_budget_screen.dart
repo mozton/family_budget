@@ -15,7 +15,6 @@ class DualBudgetPage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           centerTitle: true,
-          // 2. Usamos el title para nuestro TabBar estilizado
           title: Container(
             height: 45,
             width: 280,

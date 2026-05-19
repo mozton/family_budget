@@ -1,3 +1,4 @@
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:flutter/material.dart';
 
 abstract class CategoryEvent {}
@@ -28,3 +29,8 @@ class DeleteCategoryEvent extends CategoryEvent {
 }
 
 class LoadCategories extends CategoryEvent {}
+
+class UpdateCategoryEvent extends CategoryEvent {
+  final CategoryEntity category;
+  UpdateCategoryEvent(this.category);
+}

@@ -14,4 +14,5 @@ abstract class CategoryRepository {
   Future<void> saveCategory(CategoryEntity category);
   Future<List<CategoryEntity>> getCategories();
   Future<void> deleteCategory(String name);
+  Future<CategoryEntity> updateCategory(CategoryEntity category);
 }

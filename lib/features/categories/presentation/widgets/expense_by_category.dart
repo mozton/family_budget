@@ -1,7 +1,6 @@
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
-import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
-import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,7 +12,7 @@ class ExpenseByCategory extends StatelessWidget {
   final double spent;
   final double limit;
   final bool isOver;
-  final double percent;
+
   final Color color;
   final IconData icon;
   const ExpenseByCategory({
@@ -21,7 +20,7 @@ class ExpenseByCategory extends StatelessWidget {
     required this.spent,
     required this.limit,
     required this.isOver,
-    required this.percent,
+
     required this.color,
     required this.icon,
     required this.name,
@@ -29,18 +28,15 @@ class ExpenseByCategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final transactionsBloc = context.read<TransactionBloc>().state;
-    final transactionsList = transactionsBloc.transactions;
-    final categoryTransactions = transactionsList
-        .where((e) => e.category.name == name)
-        .toList();
-    double categorySpent = 0;
-    for (var e in categoryTransactions) {
-      if (e.type == TransactionType.expense) {
-        categorySpent += e.amount;
-      }
-    }
-
+    final category = CategoryEntity(
+      name: name,
+      currentAmount: spent,
+      targetAmount: limit,
+      color: color,
+      icon: icon,
+      id: '',
+      remoteId: '',
+    );
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (context, state) {
         return Container(
@@ -149,7 +145,9 @@ class ExpenseByCategory extends StatelessWidget {
                     ),
                   ),
                   FractionallySizedBox(
-                    widthFactor: 0.0,
+                    widthFactor: category.budgetPercent() > 1
+                        ? 1.0
+                        : category.budgetPercent(),
                     child: Container(
                       height: 6,
                       decoration: BoxDecoration(

@@ -1,7 +1,7 @@
-import 'package:family_budget/presentation/screens/dream_screen.dart';
+import 'package:family_budget/features/dreams/dream_screen.dart';
 
-import 'package:family_budget/presentation/screens/home_screen.dart';
-import 'package:family_budget/presentation/screens/list_screen.dart';
+import 'package:family_budget/features/transactions/presentation/screens/home_screen.dart';
+import 'package:family_budget/features/main_navigation/presentation/pages/dashboard_page.dart';
 import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class _MainNavigationState extends State<MainNavigation> {
   // Lista de pantallas principales
   final List<Widget> _screens = [
     const HomeScreen(),
-    const HistoryScreen(),
+    const DashBoardPage(),
     const DreamsScreen(),
     const ProfileScreen(),
   ];

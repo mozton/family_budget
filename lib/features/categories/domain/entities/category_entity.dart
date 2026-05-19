@@ -26,4 +26,11 @@ class CategoryEntity {
     this.ownerId = '',
     required this.remoteId,
   });
+
+  double budgetPercent() {
+    if (targetAmount == null || targetAmount == 0) {
+      return 0.0;
+    }
+    return (currentAmount / targetAmount!) * 100;
+  }
 }

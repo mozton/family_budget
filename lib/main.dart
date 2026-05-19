@@ -3,6 +3,7 @@ import 'package:family_budget/features/categories/data/repository/category_repos
 import 'package:family_budget/features/categories/domain/usercases/get_category.dart';
 import 'package:family_budget/features/categories/domain/usercases/save_category.dart';
 import 'package:family_budget/features/categories/domain/usercases/delete_category.dart';
+import 'package:family_budget/features/categories/domain/usercases/update_category.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
@@ -13,9 +14,9 @@ import 'package:family_budget/features/transactions/domiain/usecases/save_transa
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
-import 'package:family_budget/presentation/screens/budget_screen.dart';
-import 'package:family_budget/presentation/screens/dream_screen.dart';
-import 'package:family_budget/presentation/screens/list_screen.dart';
+import 'package:family_budget/features/categories/presentation/screens/budget_page.dart';
+import 'package:family_budget/features/dreams/dream_screen.dart';
+import 'package:family_budget/features/main_navigation/presentation/pages/dashboard_page.dart';
 import 'package:family_budget/features/main_navigation/presentation/pages/main_navigation_screen.dart';
 import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
@@ -57,6 +58,7 @@ void main() async {
   final saveCategoryUseCase = SaveCategory(categoryRepository);
   final getCategoriesUseCase = GetCategories(categoryRepository);
   final deleteCategoryUseCase = DeleteCategory(categoryRepository);
+  final updateCategoryUseCase = UpdateCategory(categoryRepository);
 
   // (Inyección real de transacciones)
   final transactionLocalDataSource = TransactionLocalDataSourceImpl(isar: isar);
@@ -76,6 +78,7 @@ void main() async {
             saveCategoryUseCase,
             getCategoriesUseCase,
             deleteCategoryUseCase,
+            updateCategoryUseCase,
           )..add(LoadCategories()),
         ),
         BlocProvider(
@@ -107,7 +110,7 @@ class MyApp extends StatelessWidget {
               'expense';
           return NewCategoryScreen(type: type);
         },
-        '/history': (context) => const HistoryScreen(),
+        '/history': (context) => const DashBoardPage(),
         '/dreams': (context) => const DreamsScreen(),
         '/profile': (context) => const ProfileScreen(),
         // Corregido: de '/budget_screenm' a '/budget_screen'

@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 
 class NewCategoryScreen extends StatefulWidget {
   final String type;
+
   const NewCategoryScreen({super.key, required this.type});
 
   @override
@@ -663,7 +664,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
           ),
         ),
         child: Text(
-          "Crear Categoría",
+          "Guardar Categoría",
           style: GoogleFonts.quicksand(
             fontSize: 18,
             fontWeight: FontWeight.bold,

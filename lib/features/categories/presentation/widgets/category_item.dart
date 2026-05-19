@@ -37,7 +37,7 @@ class CategoryItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isSelected
-                    ? const Color(0xFF9333EA).withValues(alpha: .5)
+                    ? color.withValues(alpha: .5)
                     : Colors.transparent,
                 width: 2,
               ),
