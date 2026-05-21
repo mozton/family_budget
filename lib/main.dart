@@ -3,14 +3,17 @@ import 'package:family_budget/features/categories/data/repository/category_repos
 import 'package:family_budget/features/categories/domain/usercases/get_category.dart';
 import 'package:family_budget/features/categories/domain/usercases/save_category.dart';
 import 'package:family_budget/features/categories/domain/usercases/delete_category.dart';
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/domain/usercases/update_category.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/transactions/data/repository/transaction_repository_impl.dart';
+import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:family_budget/features/transactions/domiain/usecases/get_transactions.dart';
 import 'package:family_budget/features/transactions/domiain/usecases/save_transaction.dart'
     as trans;
+import 'package:family_budget/features/transactions/domiain/usecases/update_transaction.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
@@ -18,6 +21,7 @@ import 'package:family_budget/features/categories/presentation/screens/budget_pa
 import 'package:family_budget/features/dreams/dream_screen.dart';
 import 'package:family_budget/features/main_navigation/presentation/pages/dashboard_page.dart';
 import 'package:family_budget/features/main_navigation/presentation/pages/main_navigation_screen.dart';
+import 'package:family_budget/features/transactions/presentation/screens/edit_transaction_screen.dart';
 import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +71,7 @@ void main() async {
   );
   final saveTransactionUseCase = trans.SaveTransaction(transactionRepository);
   final getTransactionsUseCase = GetTransactionsUsecase(transactionRepository);
+  final updateTransactionUseCase = UpdateTransaction(transactionRepository);
 
   // 6. CORRER LA APP
   runApp(
@@ -82,9 +87,11 @@ void main() async {
           )..add(LoadCategories()),
         ),
         BlocProvider(
-          create: (_) =>
-              TransactionBloc(saveTransactionUseCase, getTransactionsUseCase)
-                ..add(GetTransactionsEvent()),
+          create: (_) => TransactionBloc(
+            saveTransactionUseCase,
+            getTransactionsUseCase,
+            updateTransactionUseCase,
+          )..add(GetTransactionsEvent()),
         ),
       ],
       child: const MyApp(),
@@ -105,10 +112,22 @@ class MyApp extends StatelessWidget {
         '/': (context) => const MainNavigation(),
         '/new_entry': (context) => NewEntryScreen(),
         '/new_category': (context) {
-          final type =
-              ModalRoute.of(context)?.settings.arguments as String? ??
-              'expense';
-          return NewCategoryScreen(type: type);
+          final args = ModalRoute.of(context)?.settings.arguments;
+          String type = 'expense';
+          CategoryEntity? categoryToEdit;
+          if (args is String) {
+            type = args;
+          } else if (args is Map<String, dynamic>) {
+            type = args['type'] as String? ?? 'expense';
+            categoryToEdit = args['category'] as CategoryEntity?;
+          }
+          return NewCategoryScreen(type: type, categoryToEdit: categoryToEdit);
+        },
+        '/edit_transaction': (context) {
+          final transaction =
+              ModalRoute.of(context)!.settings.arguments as TransactionEntity;
+
+          return EditTransactionScreen(transaction: transaction);
         },
         '/history': (context) => const DashBoardPage(),
         '/dreams': (context) => const DreamsScreen(),

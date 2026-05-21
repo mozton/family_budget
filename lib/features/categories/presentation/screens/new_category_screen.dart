@@ -1,4 +1,5 @@
 import 'package:family_budget/core/widgets/custom_type_selector.dart';
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
@@ -11,8 +12,9 @@ import 'package:uuid/uuid.dart';
 
 class NewCategoryScreen extends StatefulWidget {
   final String type;
+  final CategoryEntity? categoryToEdit;
 
-  const NewCategoryScreen({super.key, required this.type});
+  const NewCategoryScreen({super.key, required this.type, this.categoryToEdit});
 
   @override
   State<NewCategoryScreen> createState() => _NewCategoryScreenState();
@@ -179,9 +181,21 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
   @override
   void initState() {
     super.initState();
-    colorSelected = colors.first;
-    typeSelected = widget.type;
-    selectedIcon = availableIcons.first;
+    if (widget.categoryToEdit != null) {
+      final category = widget.categoryToEdit!;
+      titleController.text = category.name;
+      limitController.text =
+          category.targetAmount != null && category.targetAmount != 0
+          ? category.targetAmount!.toStringAsFixed(0)
+          : '';
+      colorSelected = category.color ?? colors.first;
+      typeSelected = category.type?.name ?? widget.type;
+      selectedIcon = category.icon;
+    } else {
+      colorSelected = colors.first;
+      typeSelected = widget.type;
+      selectedIcon = availableIcons.first;
+    }
   }
 
   @override
@@ -200,7 +214,9 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                 onPressed: () => Navigator.pop(context),
               ),
               title: Text(
-                'Nueva Categoría',
+                widget.categoryToEdit != null
+                    ? 'Editar Categoría'
+                    : 'Nueva Categoría',
                 style: GoogleFonts.quicksand(
                   color: const Color(0xFF1F2937),
                   fontWeight: FontWeight.bold,
@@ -622,6 +638,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
   }
 
   Widget _buildSubmitButton() {
+    final isEditing = widget.categoryToEdit != null;
     return Container(
       width: double.infinity,
       height: 60,
@@ -638,21 +655,42 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
       ),
       child: ElevatedButton(
         onPressed: () {
-          final uuid = Uuid().v4();
-
-          final newCategory = CreateCategory(
-            name: titleController.text,
-            icon: selectedIcon,
-            color: colorSelected,
-            type: typeSelected,
-            currentAmount: 0,
-            remoteId: uuid,
-            targetAmount: limitController.text.isNotEmpty
-                ? double.parse(limitController.text)
-                : 0,
-          );
-
-          context.read<CategoryBloc>().add(newCategory);
+          if (isEditing) {
+            final category = widget.categoryToEdit!;
+            final updatedCategory = CategoryEntity(
+              id: category.id,
+              name: titleController.text,
+              icon: selectedIcon,
+              color: colorSelected,
+              type: CategoryType.values.firstWhere(
+                (e) => e.name == typeSelected,
+              ),
+              currentAmount: category.currentAmount,
+              targetAmount: limitController.text.isNotEmpty
+                  ? double.tryParse(limitController.text) ?? 0.0
+                  : 0.0,
+              isPrivate: category.isPrivate,
+              ownerId: category.ownerId,
+              remoteId: category.remoteId,
+            );
+            context.read<CategoryBloc>().add(
+              UpdateCategoryEvent(updatedCategory),
+            );
+          } else {
+            final uuid = const Uuid().v4();
+            final newCategory = CreateCategory(
+              name: titleController.text,
+              icon: selectedIcon,
+              color: colorSelected,
+              type: typeSelected,
+              currentAmount: 0,
+              remoteId: uuid,
+              targetAmount: limitController.text.isNotEmpty
+                  ? double.tryParse(limitController.text) ?? 0.0
+                  : 0.0,
+            );
+            context.read<CategoryBloc>().add(newCategory);
+          }
 
           Navigator.pop(context);
         },
@@ -664,7 +702,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
           ),
         ),
         child: Text(
-          "Guardar Categoría",
+          isEditing ? "Guardar Cambios" : "Guardar Categoría",
           style: GoogleFonts.quicksand(
             fontSize: 18,
             fontWeight: FontWeight.bold,

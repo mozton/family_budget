@@ -5,4 +5,5 @@ abstract class TransactionRepository {
   Future<TransactionEntity> getTransactionById(int id);
   Future<void> saveTransaction(TransactionEntity transaction);
   Future<void> deleteTransaction(int id);
+  Future<void> updateTransaction(TransactionEntity transaction);
 }

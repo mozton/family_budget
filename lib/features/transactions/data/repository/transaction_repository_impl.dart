@@ -21,6 +21,12 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
+  Future<void> updateTransaction(TransactionEntity transaction) async {
+    final transactionModel = transaction.toIsarModel();
+    await localDataSource.updateTransaction(transactionModel);
+  }
+
+  @override
   Future<void> deleteTransaction(int id) {
     // TODO: implement deleteTransaction
     throw UnimplementedError();

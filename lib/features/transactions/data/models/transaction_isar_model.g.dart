@@ -164,7 +164,7 @@ TransactionIsarModel _transactionIsarModelDeserialize(
   object.remoteId = reader.readStringOrNull(offsets[5]);
   object.type = _TransactionIsarModeltypeValueEnumMap[
           reader.readByteOrNull(offsets[6])] ??
-      CategoryType.expense;
+      TransactionType.income;
   return object;
 }
 
@@ -190,19 +190,19 @@ P _transactionIsarModelDeserializeProp<P>(
     case 6:
       return (_TransactionIsarModeltypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
-          CategoryType.expense) as P;
+          TransactionType.income) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _TransactionIsarModeltypeEnumValueMap = {
-  'expense': 0,
-  'income': 1,
+  'income': 0,
+  'expense': 1,
 };
 const _TransactionIsarModeltypeValueEnumMap = {
-  0: CategoryType.expense,
-  1: CategoryType.income,
+  0: TransactionType.income,
+  1: TransactionType.expense,
 };
 
 Id _transactionIsarModelGetId(TransactionIsarModel object) {
@@ -1196,7 +1196,7 @@ extension TransactionIsarModelQueryFilter on QueryBuilder<TransactionIsarModel,
   }
 
   QueryBuilder<TransactionIsarModel, TransactionIsarModel,
-      QAfterFilterCondition> typeEqualTo(CategoryType value) {
+      QAfterFilterCondition> typeEqualTo(TransactionType value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'type',
@@ -1207,7 +1207,7 @@ extension TransactionIsarModelQueryFilter on QueryBuilder<TransactionIsarModel,
 
   QueryBuilder<TransactionIsarModel, TransactionIsarModel,
       QAfterFilterCondition> typeGreaterThan(
-    CategoryType value, {
+    TransactionType value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1221,7 +1221,7 @@ extension TransactionIsarModelQueryFilter on QueryBuilder<TransactionIsarModel,
 
   QueryBuilder<TransactionIsarModel, TransactionIsarModel,
       QAfterFilterCondition> typeLessThan(
-    CategoryType value, {
+    TransactionType value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1235,8 +1235,8 @@ extension TransactionIsarModelQueryFilter on QueryBuilder<TransactionIsarModel,
 
   QueryBuilder<TransactionIsarModel, TransactionIsarModel,
       QAfterFilterCondition> typeBetween(
-    CategoryType lower,
-    CategoryType upper, {
+    TransactionType lower,
+    TransactionType upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -1589,7 +1589,7 @@ extension TransactionIsarModelQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<TransactionIsarModel, CategoryType, QQueryOperations>
+  QueryBuilder<TransactionIsarModel, TransactionType, QQueryOperations>
       typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');

@@ -3,8 +3,8 @@ import 'package:family_budget/features/categories/domain/entities/category_entit
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
-import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_item.dart';
+import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 
@@ -174,7 +174,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                           });
                         },
                         onLongPress: () {
-                          _showDeleteCategoryDialog(context, category.name);
+                          _showCategoryActionDialog(context, category);
                         },
                       );
                     },
@@ -201,7 +201,10 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     );
   }
 
-  void _showDeleteCategoryDialog(BuildContext context, String categoryName) {
+  void _showCategoryActionDialog(
+    BuildContext context,
+    CategoryEntity category,
+  ) {
     final size = MediaQuery.of(context).size;
     showModalBottomSheet(
       context: context,
@@ -249,7 +252,19 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                     children: [
                       Expanded(
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pushNamed(
+                              context,
+                              '/new_category',
+                              arguments: {
+                                'type':
+                                    category.type?.name ??
+                                    (isExpense ? 'expense' : 'income'),
+                                'category': category,
+                              },
+                            );
+                          },
                           child: Text(
                             "Editar categoría",
                             style: GoogleFonts.quicksand(
@@ -264,7 +279,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             context.read<CategoryBloc>().add(
-                              DeleteCategoryEvent(categoryName),
+                              DeleteCategoryEvent(category.name),
                             );
                             Navigator.pop(context);
                           },
@@ -446,7 +461,9 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                 targetAmount: 0,
                 remoteId: selectedCategory.remoteId,
               ),
-              type: isExpense ? CategoryType.expense : CategoryType.income,
+              type: isExpense
+                  ? TransactionType.expense
+                  : TransactionType.income,
             ),
           );
           Navigator.pop(context);

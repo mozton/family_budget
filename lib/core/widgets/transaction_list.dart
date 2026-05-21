@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
@@ -39,20 +41,52 @@ class TransactionListWidget extends StatelessWidget {
               itemCount: state.transactions.length,
               itemBuilder: (BuildContext context, int index) {
                 final transaction = state.transactions[index];
-                return TransactionItem(
-                  icon: transaction.category.icon,
-                  iconColor: transaction.category.color ?? Colors.grey,
-                  title: transaction.category.name,
-                  date: transaction.date.toString(),
-                  user: 'Tu',
-                  amount: NumberFormat(
-                    "#,##0.00",
-                    "en_US",
-                  ).format(transaction.amount),
-                  amountColor: transaction.type == CategoryType.expense
-                      ? Colors.red
-                      : Colors.green,
-                  isPrivate: transaction.isPrivate,
+                return Slidable(
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {
+                          Navigator.pushNamed(
+                            context,
+                            '/edit_transaction',
+                            arguments: transaction,
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+
+                        backgroundColor: Colors.greenAccent,
+                        foregroundColor: Colors.purpleAccent,
+                        icon: TablerIcons.edit,
+                        label: 'Editar',
+                      ),
+                      SlidableAction(
+                        onPressed: (context) {},
+                        borderRadius: BorderRadius.circular(16),
+
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        icon: TablerIcons.trash,
+                        label: 'Eliminar',
+                      ),
+                    ],
+                  ),
+                  child: TransactionItem(
+                    icon: transaction.category.icon,
+                    iconColor: transaction.category.color ?? Colors.grey,
+                    title: transaction.category.name,
+                    date: transaction.date.toString(),
+                    user: 'Tu',
+                    amount: NumberFormat(
+                      "#,##0.00",
+                      "en_US",
+                    ).format(transaction.amount),
+                    amountColor:
+                        transaction.category.type == CategoryType.expense
+                        ? Colors.red
+                        : Colors.green,
+                    isPrivate: transaction.isPrivate,
+                  ),
                 );
               },
             );

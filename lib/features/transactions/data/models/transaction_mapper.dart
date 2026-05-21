@@ -1,7 +1,5 @@
-import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
 import 'package:family_budget/features/categories/data/models/category_mapper.dart';
-import 'package:family_budget/features/categories/domain/entities/category_entity.dart'
-    as category_entity;
+
 import 'package:family_budget/features/transactions/data/models/transaction_isar_model.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:uuid/uuid.dart';
@@ -27,9 +25,9 @@ extension TransactionIsarMapper on TransactionIsarModel {
       date: date,
 
       // Mapeo del Enum de Isar al Enum del Dominio
-      type: type == CategoryType.expense
-          ? category_entity.CategoryType.expense
-          : category_entity.CategoryType.income,
+      transactionType: type == TransactionType.expense
+          ? TransactionType.expense
+          : TransactionType.income,
     );
   }
 }
@@ -46,9 +44,9 @@ extension TransactionEntityMapper on TransactionEntity {
       ..isPrivate = isPrivate
       ..date = date
       ..ownerId = ownerId.isNotEmpty ? ownerId : category.ownerId
-      ..type = type == category_entity.CategoryType.expense
-          ? CategoryType.expense
-          : CategoryType.income;
+      ..type = transactionType == TransactionType.expense
+          ? TransactionType.expense
+          : TransactionType.income;
 
     if (parsedId != null) {
       model.id = parsedId;

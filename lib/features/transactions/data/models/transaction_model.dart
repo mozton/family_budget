@@ -10,7 +10,7 @@ class TransactionModel extends TransactionEntity {
     required super.isPrivate,
     super.ownerId = '',
     required super.date,
-    required super.type,
+    required super.transactionType,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -20,7 +20,7 @@ class TransactionModel extends TransactionEntity {
       note: json['note'],
       isPrivate: json['isPrivate'],
       date: json['date'],
-      type: json['type'],
+      transactionType: json['type'],
     );
   }
 
@@ -31,7 +31,7 @@ class TransactionModel extends TransactionEntity {
       'note': note,
       'isPrivate': isPrivate,
       'date': date,
-      'type': type,
+      'type': transactionType,
     };
   }
 }

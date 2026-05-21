@@ -11,7 +11,7 @@ class TransactionEntity {
   final bool isPrivate;
   final String ownerId;
   final DateTime date;
-  final CategoryType type;
+  final TransactionType transactionType;
 
   TransactionEntity({
     this.id = '',
@@ -22,6 +22,6 @@ class TransactionEntity {
     required this.isPrivate,
     this.ownerId = '',
     required this.date,
-    required this.type,
+    required this.transactionType,
   });
 }

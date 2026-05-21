@@ -1,4 +1,5 @@
 import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
+import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:isar/isar.dart';
 
 part 'transaction_isar_model.g.dart';
@@ -13,16 +14,16 @@ class TransactionIsarModel {
   final category = IsarLink<CategoryIsarModel>();
 
   late double amount;
-  
+
   late String note;
-  
+
   late bool isPrivate;
 
   @Index()
   late DateTime date;
 
   @enumerated
-  late CategoryType type;
+  late TransactionType type;
 
   @Index()
   late String ownerId;

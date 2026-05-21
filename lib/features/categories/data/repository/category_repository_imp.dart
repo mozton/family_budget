@@ -1,4 +1,5 @@
 import 'package:family_budget/features/categories/data/datasources/category_local_datasource.dart';
+import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
 import 'package:family_budget/features/categories/data/models/category_mapper.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/domain/repositories/category_reposiroty.dart';
@@ -25,6 +26,9 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   @override
   Future<CategoryEntity> updateCategory(CategoryEntity category) async {
-    return await categoryLocalDataSource.updateCategory(category.toIsarModel());
+    final updatedModel = await categoryLocalDataSource.updateCategory(
+      category.toIsarModel(),
+    );
+    return (updatedModel as CategoryIsarModel).toEntity();
   }
 }

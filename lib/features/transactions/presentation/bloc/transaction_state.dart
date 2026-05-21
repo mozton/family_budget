@@ -1,4 +1,3 @@
-import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
 class TransactionState {
@@ -15,11 +14,11 @@ class TransactionState {
   });
 
   double get totalIncomes => transactions
-      .where((t) => t.type == CategoryType.income)
+      .where((t) => t.transactionType == TransactionType.income)
       .fold(0.0, (sum, t) => sum + t.amount);
 
   double get totalExpenses => transactions
-      .where((t) => t.type == CategoryType.expense)
+      .where((t) => t.transactionType == TransactionType.expense)
       .fold(0.0, (sum, t) => sum + t.amount);
 
   double get currentBalance => initialBalance + totalIncomes - totalExpenses;
