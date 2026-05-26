@@ -1,4 +1,4 @@
-import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
+import 'package:family_budget/core/widgets/date_time_picker.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart'
     hide CategoryType;
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
@@ -25,9 +25,10 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _amountController;
   late TextEditingController _noteController;
+  late DateTime _dateTime;
 
   late TransactionType _selectedType;
-  DateTime _selectedDate = DateTime.now();
+
   late bool _isPrivate;
   late CategoryEntity _selectedCategory;
 
@@ -39,10 +40,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       text: widget.transaction.amount.toStringAsFixed(2),
     );
     _noteController = TextEditingController(text: widget.transaction.note);
-    _selectedType =
-        widget.transaction.transactionType == TransactionType.expense
-        ? TransactionType.income
-        : TransactionType.expense;
+    _selectedType = widget.transaction.transactionType;
+    _dateTime = widget.transaction.date;
     _isPrivate = widget.transaction.isPrivate;
     _selectedCategory = widget.transaction.category;
   }
@@ -52,78 +51,6 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF9333EA), // Morado de Nuestra Bóveda
-              onPrimary: Colors.white,
-              onSurface: Color(0xFF1F2937),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  void _submitData() {
-    // if (!_formKey.currentState!.validate()) return;
-    // if (_selectedCategory == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text("Por favor, selecciona una categoría"),
-    //       backgroundColor: Colors.redAccent,
-    //     ),
-    //   );
-    //   return;
-    // }
-
-    final double amount = double.parse(_amountController.text);
-    final String note = _noteController.text;
-
-    // Creamos la entidad actualizada conservando el mismo ID y remoteId
-    final updatedTransaction = TransactionEntity(
-      id: widget.transaction.id,
-      remoteId: widget.transaction.remoteId,
-      amount: amount,
-      note: note,
-      date: _selectedDate,
-      isPrivate: _isPrivate,
-      ownerId: widget.transaction.ownerId,
-      transactionType: widget.transaction.transactionType,
-      category: widget.transaction.category,
-    );
-
-    // Disparamos el evento de actualización en nuestro BLoC de transacciones
-    context.read<TransactionBloc>().add(
-      UpdateTransactionEvent(
-        updatedTransaction,
-        id: widget.transaction.id,
-        amount: widget.transaction.amount,
-        note: widget.transaction.note,
-        date: DateTime.now(),
-        isPrivate: widget.transaction.isPrivate,
-        category: widget.transaction.category,
-        transactionType: widget.transaction.transactionType,
-      ),
-    );
-
-    // Regresamos a la pantalla anterior
-    Navigator.pop(context);
   }
 
   @override
@@ -183,7 +110,14 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                 const SizedBox(height: 20),
 
                 // Fecha de Transacción
-                _buildDatePickerTile(),
+                DateTimePicker(
+                  selectedDate: _dateTime,
+                  onDateSelected: (date) {
+                    setState(() {
+                      _dateTime = date;
+                    });
+                  },
+                ),
                 const SizedBox(height: 20),
 
                 // Toggle de Privacidad (Bóveda Personal vs Compartida 🔒)
@@ -228,7 +162,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
           return Expanded(
             child: GestureDetector(
               onTap: () => setState(
-                () => _selectedType = widget.transaction.transactionType,
+                () => _selectedType = type,
               ),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -479,46 +413,6 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
     );
   }
 
-  Widget _buildDatePickerTile() {
-    return InkWell(
-      onTap: () => _selectDate(context),
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey[100]!),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.calendar_month_outlined, color: Colors.grey),
-                const SizedBox(width: 12),
-                Text(
-                  "Fecha",
-                  style: GoogleFonts.quicksand(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1F2937),
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              "${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}",
-              style: GoogleFonts.quicksand(
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF9333EA),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildPrivacyToggle() {
     return InkWell(
       onTap: () => setState(() => _isPrivate = !_isPrivate),
@@ -582,7 +476,29 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _submitData,
+        onPressed: () {
+          final amount = double.parse(_amountController.text);
+          final note = _noteController.text;
+          final updatedTransaction = TransactionEntity(
+            id: widget.transaction.id,
+            remoteId: widget.transaction.remoteId,
+            amount: amount,
+            note: note,
+            date: _dateTime,
+            isPrivate: _isPrivate,
+            ownerId: widget.transaction.ownerId,
+            transactionType: _selectedType,
+            category: _selectedCategory,
+          );
+
+          // Disparamos el evento de actualización en nuestro BLoC de transacciones
+          context.read<TransactionBloc>().add(
+            UpdateTransactionEvent(updatedTransaction),
+          );
+
+          // Regresamos a la pantalla anterior
+          Navigator.pop(context);
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF9333EA),
           foregroundColor: Colors.white,

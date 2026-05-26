@@ -12,6 +12,7 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
   Future<void> saveTransaction(TransactionIsarModel transaction) async {
     await isar.writeTxn(() async {
       // 1. ARREGLO DE RELACIÓN: Buscamos la categoría real en la BD local
+      CategoryIsarModel? targetCategory;
       if (transaction.category.value != null) {
         final catRemoteId = transaction.category.value!.remoteId;
         final existingCategory = await isar.categoryIsarModels
@@ -22,44 +23,92 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
         if (existingCategory != null) {
           // Conectamos la categoría gestionada por Isar
           transaction.category.value = existingCategory;
+          targetCategory = existingCategory;
         }
       }
 
       // 2. Guardamos la transacción y OBLIGAMOS a guardar el Link
       await isar.transactionIsarModels.put(transaction);
       await transaction.category.save();
+
+      // 3. Recalcular el currentAmount de la categoría
+      if (targetCategory != null) {
+        final txs = await isar.transactionIsarModels
+            .filter()
+            .category((q) => q.remoteIdEqualTo(targetCategory!.remoteId))
+            .findAll();
+        double total = 0.0;
+        for (var tx in txs) {
+          total += tx.amount;
+        }
+        targetCategory.currentAmount = total;
+        await isar.categoryIsarModels.put(targetCategory);
+      }
     });
   }
 
   @override
   Future<void> updateTransaction(TransactionIsarModel transaction) async {
     await isar.writeTxn(() async {
-      // 1. ARREGLO DE DUPLICADOS: Recuperamos el ID numérico local
+      // Buscar transacción existente
       final existingTx = await isar.transactionIsarModels
           .filter()
           .remoteIdEqualTo(transaction.remoteId)
           .findFirst();
 
+      CategoryIsarModel? oldCategory;
       if (existingTx != null) {
         transaction.id = existingTx.id;
+        await existingTx.category.load();
+        oldCategory = existingTx.category.value;
       }
 
-      // 2. ARREGLO DE RELACIÓN (Categoría): Evita el crash por violación de índice
-      if (transaction.category.value != null) {
-        final catRemoteId = transaction.category.value!.remoteId;
+      // Reconectar categoría existente
+      CategoryIsarModel? newCategory;
+      final category = transaction.category.value;
+
+      if (category != null) {
         final existingCategory = await isar.categoryIsarModels
             .filter()
-            .remoteIdEqualTo(catRemoteId)
+            .remoteIdEqualTo(category.remoteId)
             .findFirst();
 
         if (existingCategory != null) {
           transaction.category.value = existingCategory;
+          newCategory = existingCategory;
         }
       }
 
-      // 3. Actualizamos transacción y su link
       await isar.transactionIsarModels.put(transaction);
       await transaction.category.save();
+
+      // Recalcular para la antigua categoría
+      if (oldCategory != null) {
+        final txs = await isar.transactionIsarModels
+            .filter()
+            .category((q) => q.remoteIdEqualTo(oldCategory!.remoteId))
+            .findAll();
+        double total = 0.0;
+        for (var tx in txs) {
+          total += tx.amount;
+        }
+        oldCategory.currentAmount = total;
+        await isar.categoryIsarModels.put(oldCategory);
+      }
+
+      // Recalcular para la nueva categoría si es diferente de la antigua
+      if (newCategory != null && (oldCategory == null || oldCategory.remoteId != newCategory.remoteId)) {
+        final txs = await isar.transactionIsarModels
+            .filter()
+            .category((q) => q.remoteIdEqualTo(newCategory!.remoteId))
+            .findAll();
+        double total = 0.0;
+        for (var tx in txs) {
+          total += tx.amount;
+        }
+        newCategory.currentAmount = total;
+        await isar.categoryIsarModels.put(newCategory);
+      }
     });
   }
 
@@ -84,8 +133,23 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
         .findFirst();
 
     if (existingTx != null) {
+      await existingTx.category.load();
+      final category = existingTx.category.value;
       await isar.writeTxn(() async {
         await isar.transactionIsarModels.delete(existingTx.id);
+
+        if (category != null) {
+          final txs = await isar.transactionIsarModels
+              .filter()
+              .category((q) => q.remoteIdEqualTo(category.remoteId))
+              .findAll();
+          double total = 0.0;
+          for (var tx in txs) {
+            total += tx.amount;
+          }
+          category.currentAmount = total;
+          await isar.categoryIsarModels.put(category);
+        }
       });
     }
   }

@@ -74,17 +74,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       );
 
       try {
-        final updatedTransaction = TransactionEntity(
-          id: event.id,
-          category: event.category,
-          amount: event.amount,
-          note: event.note,
-          date: event.date,
-          isPrivate: event.isPrivate,
-          transactionType: event.transactionType,
-        );
-
-        await updateTransactionUseCase(updatedTransaction);
+        await updateTransactionUseCase(event.transaction);
 
         final transactions = await getTransactionsUseCase.getTransactions();
 

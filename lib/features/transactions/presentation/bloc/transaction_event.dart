@@ -29,22 +29,7 @@ class AddTransactionEvent extends TransactionEvent {
 class GetTransactionsEvent extends TransactionEvent {}
 
 class UpdateTransactionEvent extends TransactionEvent {
-  final String id;
-  final CategoryEntity category;
-  final double amount;
-  final String note;
-  final DateTime date;
-  final bool isPrivate;
-  final TransactionType transactionType;
+  final TransactionEntity transaction;
 
-  UpdateTransactionEvent(
-    TransactionEntity updatedTransaction, {
-    required this.id,
-    required this.amount,
-    required this.note,
-    required this.date,
-    required this.isPrivate,
-    required this.category,
-    required this.transactionType,
-  });
+  UpdateTransactionEvent(this.transaction);
 }
