@@ -1,3 +1,4 @@
+import 'package:family_budget/features/accounts/presentation/screens/new_account_screen.dart';
 import 'package:family_budget/features/categories/data/datasources/category_local_datasource_impl.dart';
 import 'package:family_budget/features/categories/data/repository/category_repository_imp.dart';
 import 'package:family_budget/features/categories/domain/usercases/get_category.dart';
@@ -31,6 +32,7 @@ import 'package:path_provider/path_provider.dart'; // Necesario para Isar
 import 'package:isar/isar.dart';
 import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
 import 'package:family_budget/features/transactions/data/models/transaction_isar_model.dart';
+import 'package:family_budget/features/accounts/data/models/account_isar_model.dart';
 import 'package:family_budget/features/transactions/data/datasources/transaction_local_datasource_impl.dart';
 
 // ... (tus otros imports) ...
@@ -45,6 +47,7 @@ void main() async {
     [
       CategoryIsarModelSchema,
       TransactionIsarModelSchema,
+      AccountIsarModelSchema,
     ], // Aquí pones los schemas que generaste
     directory: dir.path,
   );
@@ -134,6 +137,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         // Corregido: de '/budget_screenm' a '/budget_screen'
         '/budget_screen': (context) => const BudgetPage(),
+        '/new_account': (context) => const NewAccountScreen(),
       },
     );
   }

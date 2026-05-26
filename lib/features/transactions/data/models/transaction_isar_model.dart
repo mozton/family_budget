@@ -1,4 +1,5 @@
 import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
+import 'package:family_budget/features/accounts/data/models/account_isar_model.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:isar/isar.dart';
 
@@ -12,6 +13,10 @@ class TransactionIsarModel {
   String? remoteId;
 
   final category = IsarLink<CategoryIsarModel>();
+
+  final account = IsarLink<AccountIsarModel>();
+
+  final toAccount = IsarLink<AccountIsarModel>();
 
   late double amount;
 

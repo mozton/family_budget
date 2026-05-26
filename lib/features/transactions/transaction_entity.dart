@@ -11,6 +11,8 @@ class TransactionEntity {
   final String familyId;
   final bool isPrivate;
   final String? note;
+  final String account;
+  final String toAccount;
 
   const TransactionEntity({
     required this.id,
@@ -23,5 +25,7 @@ class TransactionEntity {
     required this.familyId,
     this.isPrivate = false,
     this.note,
+    required this.account,
+    required this.toAccount,
   });
 }

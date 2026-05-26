@@ -30,7 +30,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   late TransactionType _selectedType;
 
   late bool _isPrivate;
-  late CategoryEntity _selectedCategory;
+  CategoryEntity? _selectedCategory;
 
   @override
   void initState() {
@@ -156,6 +156,10 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
             case TransactionType.income:
               label = "Ingreso";
               activeColor = Colors.green;
+              break;
+            case TransactionType.transfer:
+              label = "Traspaso";
+              activeColor = Colors.blueAccent;
               break;
           }
 

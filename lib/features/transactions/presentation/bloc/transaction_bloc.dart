@@ -5,6 +5,7 @@ import 'package:family_budget/features/transactions/domiain/usecases/save_transa
 import 'package:family_budget/features/transactions/domiain/usecases/update_transaction.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_state.dart';
+import 'package:flutter/material.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final SaveTransaction saveTransactionUseCase;
@@ -49,7 +50,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           ),
         );
       } catch (e, stackTrace) {
-        print("ERROR SAVING TRANSACTION: $e");
+        debugPrint("ERROR SAVING TRANSACTION: $e");
         print(stackTrace);
         emit(
           TransactionState(
@@ -87,7 +88,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           ),
         );
       } catch (e) {
-        print("ERROR UPDATING TRANSACTION: $e");
+        debugPrint("ERROR UPDATING TRANSACTION: $e");
 
         emit(
           TransactionState(

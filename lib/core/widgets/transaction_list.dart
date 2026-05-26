@@ -8,6 +8,7 @@ import 'package:family_budget/features/transactions/presentation/bloc/transactio
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_state.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/transaction_item.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
+import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
 class TransactionListWidget extends StatelessWidget {
   const TransactionListWidget({super.key});
@@ -72,9 +73,9 @@ class TransactionListWidget extends StatelessWidget {
                     ],
                   ),
                   child: TransactionItem(
-                    icon: transaction.category.icon,
-                    iconColor: transaction.category.color ?? Colors.grey,
-                    title: transaction.category.name,
+                    icon: transaction.category?.icon ?? TablerIcons.transfer,
+                    iconColor: transaction.category?.color ?? Colors.blueAccent,
+                    title: transaction.category?.name ?? 'Transferencia',
                     date: transaction.date.toString(),
                     user: 'Tu',
                     amount: NumberFormat(
@@ -82,9 +83,11 @@ class TransactionListWidget extends StatelessWidget {
                       "en_US",
                     ).format(transaction.amount),
                     amountColor:
-                        transaction.category.type == CategoryType.expense
+                        transaction.transactionType == TransactionType.expense
                         ? Colors.red
-                        : Colors.green,
+                        : transaction.transactionType == TransactionType.income
+                            ? Colors.green
+                            : Colors.blueAccent,
                     isPrivate: transaction.isPrivate,
                   ),
                 );
