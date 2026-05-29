@@ -34,7 +34,12 @@ class CustomTypeSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildOption(BuildContext context, String label, bool isActive, bool isLeft) {
+  Widget _buildOption(
+    BuildContext context,
+    String label,
+    bool isActive,
+    bool isLeft,
+  ) {
     return Expanded(
       child: GestureDetector(
         onTap: () {

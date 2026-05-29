@@ -12,7 +12,7 @@ class ExpenseByCategory extends StatelessWidget {
   final double spent;
   final double limit;
   final bool isOver;
-
+  final CategoryType type;
   final Color color;
   final IconData icon;
   const ExpenseByCategory({
@@ -20,10 +20,10 @@ class ExpenseByCategory extends StatelessWidget {
     required this.spent,
     required this.limit,
     required this.isOver,
-
     required this.color,
     required this.icon,
     required this.name,
+    required this.type,
   });
 
   @override
@@ -33,6 +33,7 @@ class ExpenseByCategory extends StatelessWidget {
       currentAmount: spent,
       targetAmount: limit,
       color: color,
+      type: type,
       icon: icon,
       id: '',
       remoteId: '',

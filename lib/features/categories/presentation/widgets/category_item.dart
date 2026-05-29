@@ -1,10 +1,11 @@
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CategoryItem extends StatelessWidget {
   final String name;
   final IconData icon;
-  final String type;
+  final CategoryType type;
   final Color color;
   final bool isSelected;
   final VoidCallback? onTap;
@@ -29,7 +30,7 @@ class CategoryItem extends StatelessWidget {
       child: Column(
         children: [
           AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 0),
             height: 64,
             width: 64,
             decoration: BoxDecoration(
@@ -60,6 +61,7 @@ class CategoryItem extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: isSelected ? const Color(0xFF1F2937) : Colors.grey[500],
             ),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

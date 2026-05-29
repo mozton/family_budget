@@ -10,225 +10,198 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
 
   TransactionLocalDataSourceImpl({required this.isar});
 
-  Future<void> _recalculateAccountBalance(AccountIsarModel account) async {
-    final txsAsAccount = await isar.transactionIsarModels
-        .filter()
-        .account((q) => q.remoteIdEqualTo(account.remoteId))
-        .findAll();
-    final txsAsToAccount = await isar.transactionIsarModels
-        .filter()
-        .toAccount((q) => q.remoteIdEqualTo(account.remoteId))
-        .findAll();
-
-    double balance = 0.0;
-    for (var tx in txsAsAccount) {
-      if (tx.type == TransactionType.income)
-        balance += tx.amount;
-      else if (tx.type == TransactionType.expense)
-        balance -= tx.amount;
-      else if (tx.type == TransactionType.transfer)
-        balance -= tx.amount;
-    }
-    for (var tx in txsAsToAccount) {
-      if (tx.type == TransactionType.transfer) balance += tx.amount;
-    }
-    account.balance = balance;
-    await isar.accountIsarModels.put(account);
-  }
-
   @override
   Future<void> saveTransaction(TransactionIsarModel transaction) async {
     await isar.writeTxn(() async {
-      // 1. ARREGLO DE RELACIÓN: Buscamos la categoría real en la BD local
-      CategoryIsarModel? targetCategory;
+      // 1. Resolver Categoría
       if (transaction.category.value != null) {
         final catRemoteId = transaction.category.value!.remoteId;
         final existingCategory = await isar.categoryIsarModels
             .filter()
             .remoteIdEqualTo(catRemoteId)
             .findFirst();
-
-        if (existingCategory != null) {
-          // Conectamos la categoría gestionada por Isar
+        if (existingCategory != null)
           transaction.category.value = existingCategory;
-          targetCategory = existingCategory;
-        }
       }
 
-      AccountIsarModel? targetAccount;
+      // 2. APLICAR IMPACTO A LAS CUENTAS (Matemática Financiera)
       if (transaction.account.value != null) {
         final accRemoteId = transaction.account.value!.remoteId;
-        final existingAccount = await isar.accountIsarModels
+        final existingAcc = await isar.accountIsarModels
             .filter()
             .remoteIdEqualTo(accRemoteId)
             .findFirst();
-        if (existingAccount != null) {
-          transaction.account.value = existingAccount;
-          targetAccount = existingAccount;
+
+        if (existingAcc != null) {
+          transaction.account.value = existingAcc;
+
+          // Actualizamos el saldo de la cuenta principal
+          if (transaction.type == TransactionType.expense) {
+            existingAcc.balance -= transaction.amount;
+          } else if (transaction.type == TransactionType.income) {
+            existingAcc.balance += transaction.amount;
+          } else if (transaction.type == TransactionType.transfer) {
+            existingAcc.balance -= transaction.amount; // De aquí sale el dinero
+          }
+          await isar.accountIsarModels.put(existingAcc);
         }
       }
 
-      AccountIsarModel? targetToAccount;
-      if (transaction.toAccount.value != null) {
+      if (transaction.toAccount.value != null &&
+          transaction.type == TransactionType.transfer) {
         final toAccRemoteId = transaction.toAccount.value!.remoteId;
-        final existingToAccount = await isar.accountIsarModels
+        final existingToAcc = await isar.accountIsarModels
             .filter()
             .remoteIdEqualTo(toAccRemoteId)
             .findFirst();
-        if (existingToAccount != null) {
-          transaction.toAccount.value = existingToAccount;
-          targetToAccount = existingToAccount;
+
+        if (existingToAcc != null) {
+          transaction.toAccount.value = existingToAcc;
+
+          // Actualizamos saldo de la cuenta destino
+          existingToAcc.balance += transaction.amount; // Aquí entra el dinero
+          await isar.accountIsarModels.put(existingToAcc);
         }
       }
 
-      // 2. Guardamos la transacción y OBLIGAMOS a guardar los Links
+      // 3. Guardar transacción y forzar guardado de relaciones
       await isar.transactionIsarModels.put(transaction);
       await transaction.category.save();
       await transaction.account.save();
       await transaction.toAccount.save();
-
-      // 3. Recalcular el currentAmount de la categoría
-      if (targetCategory != null) {
-        final txs = await isar.transactionIsarModels
-            .filter()
-            .category((q) => q.remoteIdEqualTo(targetCategory!.remoteId))
-            .findAll();
-        double total = 0.0;
-        for (var tx in txs) {
-          total += tx.amount;
-        }
-        targetCategory.currentAmount = total;
-        await isar.categoryIsarModels.put(targetCategory);
-      }
-
-      // 4. Recalcular el balance de las cuentas
-      if (targetAccount != null) {
-        await _recalculateAccountBalance(targetAccount);
-      }
-      if (targetToAccount != null) {
-        await _recalculateAccountBalance(targetToAccount);
-      }
     });
   }
 
   @override
   Future<void> updateTransaction(TransactionIsarModel transaction) async {
     await isar.writeTxn(() async {
-      // Buscar transacción existente
+      // 1. REVERTIR LA TRANSACCIÓN ORIGINAL (Para no duplicar sumas/restas)
       final existingTx = await isar.transactionIsarModels
           .filter()
           .remoteIdEqualTo(transaction.remoteId)
           .findFirst();
 
-      CategoryIsarModel? oldCategory;
       if (existingTx != null) {
         transaction.id = existingTx.id;
-        await existingTx.category.load();
-        oldCategory = existingTx.category.value;
-      }
 
-      // Reconectar categoría existente
-      CategoryIsarModel? newCategory;
-      final category = transaction.category.value;
+        await existingTx.account.load();
+        await existingTx.toAccount.load();
 
-      if (category != null) {
-        final existingCategory = await isar.categoryIsarModels
-            .filter()
-            .remoteIdEqualTo(category.remoteId)
-            .findFirst();
-
-        if (existingCategory != null) {
-          transaction.category.value = existingCategory;
-          newCategory = existingCategory;
+        if (existingTx.account.value != null) {
+          final oldAcc = await isar.accountIsarModels.get(
+            existingTx.account.value!.id,
+          );
+          if (oldAcc != null) {
+            if (existingTx.type == TransactionType.expense)
+              oldAcc.balance += existingTx.amount;
+            else if (existingTx.type == TransactionType.income)
+              oldAcc.balance -= existingTx.amount;
+            else if (existingTx.type == TransactionType.transfer)
+              oldAcc.balance += existingTx.amount;
+            await isar.accountIsarModels.put(oldAcc);
+          }
+        }
+        if (existingTx.toAccount.value != null &&
+            existingTx.type == TransactionType.transfer) {
+          final oldToAcc = await isar.accountIsarModels.get(
+            existingTx.toAccount.value!.id,
+          );
+          if (oldToAcc != null) {
+            oldToAcc.balance -= existingTx.amount;
+            await isar.accountIsarModels.put(oldToAcc);
+          }
         }
       }
 
-      AccountIsarModel? oldAccount;
-      if (existingTx != null) {
-        await existingTx.account.load();
-        oldAccount = existingTx.account.value;
+      // 2. Resolver nueva categoría
+      if (transaction.category.value != null) {
+        final existingCategory = await isar.categoryIsarModels
+            .filter()
+            .remoteIdEqualTo(transaction.category.value!.remoteId)
+            .findFirst();
+        if (existingCategory != null)
+          transaction.category.value = existingCategory;
       }
-      AccountIsarModel? newAccount;
+
+      // 3. APLICAR EL NUEVO IMPACTO A LAS CUENTAS (Igual que en saveTransaction)
       if (transaction.account.value != null) {
-        final existingAccount = await isar.accountIsarModels
+        final existingAcc = await isar.accountIsarModels
             .filter()
             .remoteIdEqualTo(transaction.account.value!.remoteId)
             .findFirst();
-        if (existingAccount != null) {
-          transaction.account.value = existingAccount;
-          newAccount = existingAccount;
+        if (existingAcc != null) {
+          transaction.account.value = existingAcc;
+          if (transaction.type == TransactionType.expense)
+            existingAcc.balance -= transaction.amount;
+          else if (transaction.type == TransactionType.income)
+            existingAcc.balance += transaction.amount;
+          else if (transaction.type == TransactionType.transfer)
+            existingAcc.balance -= transaction.amount;
+          await isar.accountIsarModels.put(existingAcc);
         }
       }
 
-      AccountIsarModel? oldToAccount;
-      if (existingTx != null) {
-        await existingTx.toAccount.load();
-        oldToAccount = existingTx.toAccount.value;
-      }
-      AccountIsarModel? newToAccount;
-      if (transaction.toAccount.value != null) {
-        final existingToAccount = await isar.accountIsarModels
+      if (transaction.toAccount.value != null &&
+          transaction.type == TransactionType.transfer) {
+        final existingToAcc = await isar.accountIsarModels
             .filter()
             .remoteIdEqualTo(transaction.toAccount.value!.remoteId)
             .findFirst();
-        if (existingToAccount != null) {
-          transaction.toAccount.value = existingToAccount;
-          newToAccount = existingToAccount;
+        if (existingToAcc != null) {
+          transaction.toAccount.value = existingToAcc;
+          existingToAcc.balance += transaction.amount;
+          await isar.accountIsarModels.put(existingToAcc);
         }
       }
 
+      // 4. Guardar todo
       await isar.transactionIsarModels.put(transaction);
       await transaction.category.save();
       await transaction.account.save();
       await transaction.toAccount.save();
+    });
+  }
 
-      // Recalcular para la antigua categoría
-      if (oldCategory != null) {
-        final txs = await isar.transactionIsarModels
-            .filter()
-            .category((q) => q.remoteIdEqualTo(oldCategory!.remoteId))
-            .findAll();
-        double total = 0.0;
-        for (var tx in txs) {
-          total += tx.amount;
+  @override
+  Future<void> deleteTransaction(String id) async {
+    await isar.writeTxn(() async {
+      final existingTx = await isar.transactionIsarModels
+          .filter()
+          .remoteIdEqualTo(id)
+          .findFirst();
+
+      if (existingTx != null) {
+        await existingTx.account.load();
+        await existingTx.toAccount.load();
+
+        // 1. REVERTIR IMPACTO ANTES DE ELIMINAR
+        if (existingTx.account.value != null) {
+          final oldAcc = await isar.accountIsarModels.get(
+            existingTx.account.value!.id,
+          );
+          if (oldAcc != null) {
+            if (existingTx.type == TransactionType.expense)
+              oldAcc.balance += existingTx.amount;
+            else if (existingTx.type == TransactionType.income)
+              oldAcc.balance -= existingTx.amount;
+            else if (existingTx.type == TransactionType.transfer)
+              oldAcc.balance += existingTx.amount;
+            await isar.accountIsarModels.put(oldAcc);
+          }
         }
-        oldCategory.currentAmount = total;
-        await isar.categoryIsarModels.put(oldCategory);
-      }
-
-      // Recalcular para la nueva categoría si es diferente de la antigua
-      if (newCategory != null &&
-          (oldCategory == null ||
-              oldCategory.remoteId != newCategory.remoteId)) {
-        final txs = await isar.transactionIsarModels
-            .filter()
-            .category((q) => q.remoteIdEqualTo(newCategory!.remoteId))
-            .findAll();
-        double total = 0.0;
-        for (var tx in txs) {
-          total += tx.amount;
+        if (existingTx.toAccount.value != null &&
+            existingTx.type == TransactionType.transfer) {
+          final oldToAcc = await isar.accountIsarModels.get(
+            existingTx.toAccount.value!.id,
+          );
+          if (oldToAcc != null) {
+            oldToAcc.balance -= existingTx.amount;
+            await isar.accountIsarModels.put(oldToAcc);
+          }
         }
-        newCategory.currentAmount = total;
-        await isar.categoryIsarModels.put(newCategory);
-      }
 
-      // Recalcular para la antigua y nueva account
-      if (oldAccount != null) {
-        await _recalculateAccountBalance(oldAccount);
-      }
-      if (newAccount != null &&
-          (oldAccount == null || oldAccount.remoteId != newAccount.remoteId)) {
-        await _recalculateAccountBalance(newAccount);
-      }
-
-      // Recalcular para la antigua y nueva toAccount
-      if (oldToAccount != null) {
-        await _recalculateAccountBalance(oldToAccount);
-      }
-      if (newToAccount != null &&
-          (oldToAccount == null ||
-              oldToAccount.remoteId != newToAccount.remoteId)) {
-        await _recalculateAccountBalance(newToAccount);
+        // 2. Eliminar
+        await isar.transactionIsarModels.delete(existingTx.id);
       }
     });
   }
@@ -236,54 +209,11 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
   @override
   Future<List<TransactionIsarModel>> getTransactions() async {
     final transactions = await isar.transactionIsarModels.where().findAll();
-
-    // ⚠️ CRÍTICO: Cargar los links (categorías y cuentas) antes de enviarlos a la UI
     for (var tx in transactions) {
       await tx.category.load();
       await tx.account.load();
       await tx.toAccount.load();
     }
-
     return transactions;
-  }
-
-  @override
-  Future<void> deleteTransaction(String id) async {
-    // Buscamos siempre por remoteId para mantener la consistencia
-    final existingTx = await isar.transactionIsarModels
-        .filter()
-        .remoteIdEqualTo(id)
-        .findFirst();
-
-    if (existingTx != null) {
-      await existingTx.category.load();
-      final category = existingTx.category.value;
-      await isar.writeTxn(() async {
-        await isar.transactionIsarModels.delete(existingTx.id);
-
-        if (category != null) {
-          final txs = await isar.transactionIsarModels
-              .filter()
-              .category((q) => q.remoteIdEqualTo(category.remoteId))
-              .findAll();
-          double total = 0.0;
-          for (var tx in txs) {
-            total += tx.amount;
-          }
-          category.currentAmount = total;
-          await isar.categoryIsarModels.put(category);
-        }
-
-        await existingTx.account.load();
-        if (existingTx.account.value != null) {
-          await _recalculateAccountBalance(existingTx.account.value!);
-        }
-
-        await existingTx.toAccount.load();
-        if (existingTx.toAccount.value != null) {
-          await _recalculateAccountBalance(existingTx.toAccount.value!);
-        }
-      });
-    }
   }
 }

@@ -34,3 +34,8 @@ class UpdateCategoryEvent extends CategoryEvent {
   final CategoryEntity category;
   UpdateCategoryEvent(this.category);
 }
+
+class SelectedCategoryEvent extends CategoryEvent {
+  String selectCategory;
+  SelectedCategoryEvent(this.selectCategory);
+}

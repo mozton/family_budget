@@ -28,7 +28,7 @@ class CategoryEntity {
   });
 
   double budgetPercent() {
-    if (targetAmount == null || targetAmount == 0) {
+    if (targetAmount == null || currentAmount == 0) {
       return 0.0;
     }
     return (currentAmount / targetAmount!) * 100;

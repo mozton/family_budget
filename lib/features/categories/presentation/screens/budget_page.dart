@@ -69,6 +69,7 @@ class BudgetPage extends StatelessWidget {
                             color: category.color ?? Colors.pink,
                             icon: category.icon,
                             name: category.name,
+                            type: category.type!,
                           );
                         },
                       ),

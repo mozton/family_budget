@@ -1,32 +1,51 @@
-import 'package:family_budget/features/accounts/data/models/account_isar_model.dart';
-import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-extension AccountIsarMapper on AccountIsarModel {
-  AccountEntity toEntity() {
-    return AccountEntity(
-      id: (remoteId != null && remoteId!.isNotEmpty) ? remoteId! : id.toString(),
+// Usamos "alias" para separar el modelo de Isar y la Entidad
+import 'package:family_budget/features/accounts/data/models/account_isar_model.dart'
+    as data;
+import 'package:family_budget/features/accounts/domain/entities/account_entity.dart'
+    as entity;
+
+extension AccountIsarMapper on data.AccountIsarModel {
+  entity.AccountEntity toEntity() {
+    return entity.AccountEntity(
+      id: (remoteId != null && remoteId!.isNotEmpty)
+          ? remoteId!
+          : id.toString(),
       remoteId: remoteId ?? '',
       name: name,
-      type: type,
+      icon: IconData(
+        iconCodePoint,
+        fontFamily: "tabler-icons",
+        fontPackage: "flutter_tabler_icons",
+      ),
+      color: Color(colorValue),
       balance: balance,
       isPrivate: isPrivate,
       ownerId: ownerId,
+      // 💡 Como usas el mismo enum de la Entidad en el Modelo de Isar,
+      // simplemente pasamos el valor directo sin necesidad de mapearlo:
+      type: type,
     );
   }
 }
 
-extension AccountEntityMapper on AccountEntity {
-  AccountIsarModel toIsarModel() {
+extension AccountEntityMapper on entity.AccountEntity {
+  data.AccountIsarModel toIsarModel() {
     final parsedId = int.tryParse(id);
     final isTempId = id.startsWith('temp_') || id.isEmpty;
 
-    final model = AccountIsarModel()
+    final model = data.AccountIsarModel()
       ..name = name
-      ..type = type
+      ..iconCodePoint = icon.codePoint
+      ..colorValue = color.value
       ..balance = balance
       ..isPrivate = isPrivate
-      ..ownerId = ownerId;
+      ..ownerId = ownerId
+      // 💡 Asignación directa del enum:
+      ..type = type;
 
     if (parsedId != null) {
       model.id = parsedId;

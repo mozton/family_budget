@@ -58,11 +58,12 @@ extension TransactionEntityMapper on TransactionEntity {
     } else if (model.remoteId == null || model.remoteId!.isEmpty) {
       model.remoteId = const Uuid().v4();
     }
-
+    if (account != null) model.account.value = account!.toIsarModel();
+    if (toAccount != null) model.toAccount.value = toAccount!.toIsarModel();
     // Asignar los modelos Isar a los links
     model.category.value = category?.toIsarModel();
-    model.account.value = account?.toIsarModel();
-    model.toAccount.value = toAccount?.toIsarModel();
+    // model.account.value = account?.toIsarModel();
+    // model.toAccount.value = toAccount?.toIsarModel();
 
     return model;
   }

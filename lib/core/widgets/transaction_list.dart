@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_state.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/transaction_item.dart';
-import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
+
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
 class TransactionListWidget extends StatelessWidget {
@@ -86,8 +86,8 @@ class TransactionListWidget extends StatelessWidget {
                         transaction.transactionType == TransactionType.expense
                         ? Colors.red
                         : transaction.transactionType == TransactionType.income
-                            ? Colors.green
-                            : Colors.blueAccent,
+                        ? Colors.green
+                        : Colors.blueAccent,
                     isPrivate: transaction.isPrivate,
                   ),
                 );

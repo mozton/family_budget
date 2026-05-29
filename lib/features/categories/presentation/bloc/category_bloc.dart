@@ -56,5 +56,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       await usecaseUpdate.updateCategory(event.category);
       add(LoadCategories());
     });
+
+    on<SelectedCategoryEvent>((event, emit) {
+      emit(state.copyWith(selectedCategory: event.selectCategory));
+    });
   }
 }

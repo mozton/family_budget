@@ -1,3 +1,4 @@
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
@@ -38,5 +39,3 @@ class CategoryIsarModel {
     fontPackage: "flutter_tabler_icons",
   );
 }
-
-enum CategoryType { expense, income }

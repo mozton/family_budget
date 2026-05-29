@@ -1,3 +1,11 @@
+import 'package:family_budget/features/accounts/data/datasources/account_local_datasource_impl.dart';
+import 'package:family_budget/features/accounts/data/repositories/account_repository_impl.dart';
+import 'package:family_budget/features/accounts/domain/usecases/delete_account.dart';
+import 'package:family_budget/features/accounts/domain/usecases/get_accounts.dart';
+import 'package:family_budget/features/accounts/domain/usecases/save_account.dart';
+import 'package:family_budget/features/accounts/domain/usecases/update_account.dart';
+import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
+import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
 import 'package:family_budget/features/accounts/presentation/screens/new_account_screen.dart';
 import 'package:family_budget/features/categories/data/datasources/category_local_datasource_impl.dart';
 import 'package:family_budget/features/categories/data/repository/category_repository_imp.dart';
@@ -25,6 +33,7 @@ import 'package:family_budget/features/main_navigation/presentation/pages/main_n
 import 'package:family_budget/features/transactions/presentation/screens/edit_transaction_screen.dart';
 import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
+import 'package:family_budget/features/transactions/presentation/screens/transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -76,6 +85,16 @@ void main() async {
   final getTransactionsUseCase = GetTransactionsUsecase(transactionRepository);
   final updateTransactionUseCase = UpdateTransaction(transactionRepository);
 
+  // Inyección de dependencias - Accounts
+  final accountLocalDataSource = AccountLocalDataSourceImpl(isar: isar);
+  final accountRepository = AccountRepositoryImpl(
+    localDataSource: accountLocalDataSource,
+  );
+  final getAccountsUseCase = GetAccountsUseCase(accountRepository);
+  final saveAccountUseCase = SaveAccountUseCase(accountRepository);
+  final updateAccountUseCase = UpdateAccountUseCase(accountRepository);
+  final deleteAccountUseCase = DeleteAccountUseCase(accountRepository);
+
   // 6. CORRER LA APP
   runApp(
     MultiBlocProvider(
@@ -95,6 +114,14 @@ void main() async {
             getTransactionsUseCase,
             updateTransactionUseCase,
           )..add(GetTransactionsEvent()),
+        ),
+        BlocProvider(
+          create: (_) => AccountBloc(
+            getAccountsUseCase: getAccountsUseCase,
+            saveAccountUseCase: saveAccountUseCase,
+            updateAccountUseCase: updateAccountUseCase,
+            deleteAccountUseCase: deleteAccountUseCase,
+          )..add(GetAccountsEvent()),
         ),
       ],
       child: const MyApp(),
@@ -138,6 +165,7 @@ class MyApp extends StatelessWidget {
         // Corregido: de '/budget_screenm' a '/budget_screen'
         '/budget_screen': (context) => const BudgetPage(),
         '/new_account': (context) => const NewAccountScreen(),
+        '/tfScreen': (context) => TransactionScreen(),
       },
     );
   }

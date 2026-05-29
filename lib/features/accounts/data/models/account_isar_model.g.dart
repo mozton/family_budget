@@ -22,28 +22,43 @@ const AccountIsarModelSchema = CollectionSchema(
       name: r'balance',
       type: IsarType.double,
     ),
-    r'isPrivate': PropertySchema(
+    r'colorValue': PropertySchema(
       id: 1,
+      name: r'colorValue',
+      type: IsarType.long,
+    ),
+    r'date': PropertySchema(
+      id: 2,
+      name: r'date',
+      type: IsarType.dateTime,
+    ),
+    r'iconCodePoint': PropertySchema(
+      id: 3,
+      name: r'iconCodePoint',
+      type: IsarType.long,
+    ),
+    r'isPrivate': PropertySchema(
+      id: 4,
       name: r'isPrivate',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 2,
+      id: 5,
       name: r'name',
       type: IsarType.string,
     ),
     r'ownerId': PropertySchema(
-      id: 3,
+      id: 6,
       name: r'ownerId',
       type: IsarType.string,
     ),
     r'remoteId': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'remoteId',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 5,
+      id: 8,
       name: r'type',
       type: IsarType.byte,
       enumMap: _AccountIsarModeltypeEnumValueMap,
@@ -65,6 +80,19 @@ const AccountIsarModelSchema = CollectionSchema(
           name: r'remoteId',
           type: IndexType.hash,
           caseSensitive: true,
+        )
+      ],
+    ),
+    r'date': IndexSchema(
+      id: -7552997827385218417,
+      name: r'date',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'date',
+          type: IndexType.value,
+          caseSensitive: false,
         )
       ],
     ),
@@ -114,11 +142,14 @@ void _accountIsarModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDouble(offsets[0], object.balance);
-  writer.writeBool(offsets[1], object.isPrivate);
-  writer.writeString(offsets[2], object.name);
-  writer.writeString(offsets[3], object.ownerId);
-  writer.writeString(offsets[4], object.remoteId);
-  writer.writeByte(offsets[5], object.type.index);
+  writer.writeLong(offsets[1], object.colorValue);
+  writer.writeDateTime(offsets[2], object.date);
+  writer.writeLong(offsets[3], object.iconCodePoint);
+  writer.writeBool(offsets[4], object.isPrivate);
+  writer.writeString(offsets[5], object.name);
+  writer.writeString(offsets[6], object.ownerId);
+  writer.writeString(offsets[7], object.remoteId);
+  writer.writeByte(offsets[8], object.type.index);
 }
 
 AccountIsarModel _accountIsarModelDeserialize(
@@ -129,13 +160,16 @@ AccountIsarModel _accountIsarModelDeserialize(
 ) {
   final object = AccountIsarModel();
   object.balance = reader.readDouble(offsets[0]);
+  object.colorValue = reader.readLong(offsets[1]);
+  object.date = reader.readDateTime(offsets[2]);
+  object.iconCodePoint = reader.readLong(offsets[3]);
   object.id = id;
-  object.isPrivate = reader.readBool(offsets[1]);
-  object.name = reader.readString(offsets[2]);
-  object.ownerId = reader.readString(offsets[3]);
-  object.remoteId = reader.readStringOrNull(offsets[4]);
+  object.isPrivate = reader.readBool(offsets[4]);
+  object.name = reader.readString(offsets[5]);
+  object.ownerId = reader.readString(offsets[6]);
+  object.remoteId = reader.readStringOrNull(offsets[7]);
   object.type =
-      _AccountIsarModeltypeValueEnumMap[reader.readByteOrNull(offsets[5])] ??
+      _AccountIsarModeltypeValueEnumMap[reader.readByteOrNull(offsets[8])] ??
           AccountType.cash;
   return object;
 }
@@ -150,14 +184,20 @@ P _accountIsarModelDeserializeProp<P>(
     case 0:
       return (reader.readDouble(offset)) as P;
     case 1:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (_AccountIsarModeltypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           AccountType.cash) as P;
@@ -251,6 +291,14 @@ extension AccountIsarModelQueryWhereSort
   QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterWhere> anyDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'date'),
+      );
     });
   }
 }
@@ -392,6 +440,99 @@ extension AccountIsarModelQueryWhere
   }
 
   QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterWhereClause>
+      dateEqualTo(DateTime date) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'date',
+        value: [date],
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterWhereClause>
+      dateNotEqualTo(DateTime date) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [],
+              upper: [date],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [date],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [date],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [],
+              upper: [date],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterWhereClause>
+      dateGreaterThan(
+    DateTime date, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'date',
+        lower: [date],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterWhereClause>
+      dateLessThan(
+    DateTime date, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'date',
+        lower: [],
+        upper: [date],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterWhereClause>
+      dateBetween(
+    DateTime lowerDate,
+    DateTime upperDate, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'date',
+        lower: [lowerDate],
+        includeLower: includeLower,
+        upper: [upperDate],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterWhereClause>
       ownerIdEqualTo(String ownerId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
@@ -501,6 +642,174 @@ extension AccountIsarModelQueryFilter
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      colorValueEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'colorValue',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      colorValueGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'colorValue',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      colorValueLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'colorValue',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      colorValueBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'colorValue',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      dateEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      dateGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      dateLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      dateBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'date',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      iconCodePointEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'iconCodePoint',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      iconCodePointGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'iconCodePoint',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      iconCodePointLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'iconCodePoint',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterFilterCondition>
+      iconCodePointBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'iconCodePoint',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1077,6 +1386,47 @@ extension AccountIsarModelQuerySortBy
   }
 
   QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      sortByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      sortByColorValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy> sortByDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'date', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      sortByDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'date', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      sortByIconCodePoint() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconCodePoint', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      sortByIconCodePointDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconCodePoint', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
       sortByIsPrivate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isPrivate', Sort.asc);
@@ -1158,6 +1508,47 @@ extension AccountIsarModelQuerySortThenBy
       thenByBalanceDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'balance', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      thenByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      thenByColorValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy> thenByDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'date', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      thenByDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'date', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      thenByIconCodePoint() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconCodePoint', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QAfterSortBy>
+      thenByIconCodePointDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconCodePoint', Sort.desc);
     });
   }
 
@@ -1253,6 +1644,26 @@ extension AccountIsarModelQueryWhereDistinct
   }
 
   QueryBuilder<AccountIsarModel, AccountIsarModel, QDistinct>
+      distinctByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'colorValue');
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QDistinct> distinctByDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'date');
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QDistinct>
+      distinctByIconCodePoint() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'iconCodePoint');
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, AccountIsarModel, QDistinct>
       distinctByIsPrivate() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isPrivate');
@@ -1298,6 +1709,25 @@ extension AccountIsarModelQueryProperty
   QueryBuilder<AccountIsarModel, double, QQueryOperations> balanceProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'balance');
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, int, QQueryOperations> colorValueProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'colorValue');
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, DateTime, QQueryOperations> dateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'date');
+    });
+  }
+
+  QueryBuilder<AccountIsarModel, int, QQueryOperations>
+      iconCodePointProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'iconCodePoint');
     });
   }
 

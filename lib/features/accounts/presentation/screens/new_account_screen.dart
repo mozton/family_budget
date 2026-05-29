@@ -1,7 +1,11 @@
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
+import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
+import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
 
 // NOTA: Asegúrate de tener tu AccountBloc creado para manejar el guardado
 // import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
@@ -39,16 +43,17 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
 
     final newAccount = AccountEntity(
       id: '', // Se genera en el mapper/Isar
-      remoteId: '', // Se generará con UUID en el BLoC
+      remoteId: Uuid().v4(), // Se generará con UUID en el BLoC
       name: nameController.text,
       type: selectedType,
       balance: double.tryParse(balanceController.text) ?? 0.0,
       isPrivate: false,
-      ownerId: 'current_user_id', // Reemplazar con tu lógica de usuario
+      ownerId: 'current_user_id',
+      icon: TablerIcons.clock,
+      color: Colors.red, // Reemplazar con tu lógica de usuario
     );
 
-    // TODO: Descomenta esto cuando tengas tu AccountBloc listo
-    // context.read<AccountBloc>().add(CreateAccountEvent(newAccount));
+    context.read<AccountBloc>().add(CreateAccountEvent(newAccount));
 
     Navigator.pop(context);
   }

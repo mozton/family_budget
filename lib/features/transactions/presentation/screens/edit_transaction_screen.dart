@@ -165,9 +165,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
           return Expanded(
             child: GestureDetector(
-              onTap: () => setState(
-                () => _selectedType = type,
-              ),
+              onTap: () => setState(() => _selectedType = type),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 12),

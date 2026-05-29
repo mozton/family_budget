@@ -2,7 +2,6 @@ import 'package:family_budget/features/dreams/dream_screen.dart';
 
 import 'package:family_budget/features/transactions/presentation/screens/home_screen.dart';
 import 'package:family_budget/features/main_navigation/presentation/pages/dashboard_page.dart';
-import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
@@ -37,10 +36,7 @@ class _MainNavigationState extends State<MainNavigation> {
       body: IndexedStack(index: _selectedIndex, children: _screens),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const NewEntryScreen()),
-          );
+          Navigator.pushNamed(context, '/tfScreen');
         },
         backgroundColor: const Color(0xFF9333EA),
         elevation: 8,
