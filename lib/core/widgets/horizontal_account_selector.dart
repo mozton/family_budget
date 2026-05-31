@@ -2,10 +2,10 @@ import 'package:family_budget/features/accounts/domain/entities/account_entity.d
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
 
 import 'package:family_budget/features/accounts/presentation/bloc/account_state.dart';
+import 'package:family_budget/features/accounts/presentation/widgets/account_item.dart';
 import 'package:family_budget/features/categories/presentation/widgets/add_category_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HorizontalAccountSelector extends StatelessWidget {
   final String? selectedAccountId; // null si ninguna seleccionada
@@ -24,11 +24,15 @@ class HorizontalAccountSelector extends StatelessWidget {
     return BlocBuilder<AccountBloc, AccountState>(
       builder: (context, state) {
         return SizedBox(
-          height: size.height * 0.1,
+          height: size.height * 0.12,
           width: size.width * 0.9,
-          child: ListView.builder(
+          child: GridView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: state.accounts.length + 1, // +1 por el botón "Nueva"
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1,
+              childAspectRatio: 1.1,
+            ),
+            itemCount: state.accounts.length + 1,
             itemBuilder: (context, index) {
               if (index == state.accounts.length) {
                 return AddCategoryButton(
@@ -44,63 +48,13 @@ class HorizontalAccountSelector extends StatelessWidget {
                   selectedAccountId == account.id ||
                   selectedAccountId == account.name;
 
-              return Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: GestureDetector(
-                  onTap: () => onAccountSelected(account),
-                  child: Column(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 0),
-                        height: 64,
-                        width: 64,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? account.color.withValues(alpha: 0.20)
-                              : account.color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected
-                                ? account.color
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: account.color.withValues(alpha: 0.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ]
-                              : [],
-                        ),
-                        child: Center(
-                          child: Icon(
-                            account.icon,
-                            size: 30,
-                            color: isSelected
-                                ? account.color
-                                : account.color.withValues(alpha: 0.8),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        account.name,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 10,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? const Color(0xFF1F2937)
-                              : Colors.grey[800],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              return AccountItem(
+                name: account.name,
+                amount: account.balance,
+                isSelected: isSelected,
+                icon: account.icon,
+                color: account.color,
+                onTap: () => onAccountSelected(account),
               );
             },
           ),

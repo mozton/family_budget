@@ -1,3 +1,4 @@
+import 'package:family_budget/features/main_navigation/presentation/widgets/overview.dart';
 import 'package:family_budget/features/transactions/presentation/screens/movements_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -49,14 +50,20 @@ class DashBoardPage extends StatelessWidget {
                   fontSize: 14,
                 ),
                 tabs: const [
-                  Tab(text: "Movimientos"),
+                  // Tab(text: "Movimientos"),
                   Tab(text: "Presupuesto"),
+                  Tab(text: 'OverView'),
                 ],
               ),
             ),
           ),
         ),
-        body: const TabBarView(children: [MovementsView(), BudgetPage()]),
+        body: const TabBarView(
+          children: [
+            // MovementsView(),
+            BudgetPage(), AccountsOverviewWidget(),
+          ],
+        ),
       ),
     );
   }

@@ -66,7 +66,7 @@ class CategoryItem extends StatelessWidget {
                 ),
                 child: Center(child: Icon(icon, color: color, size: 30)),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 5),
 
               // Nombre de la categoría
               Text(
@@ -89,7 +89,9 @@ class CategoryItem extends StatelessWidget {
                 style: GoogleFonts.quicksand(
                   fontSize: 9, // Letra un poco más pequeña que el título
                   fontWeight: FontWeight.w700,
-                  color: isSelected ? color : Colors.grey[400],
+                  color: isSelected
+                      ? const Color(0xFF1F2937)
+                      : Colors.grey[400],
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

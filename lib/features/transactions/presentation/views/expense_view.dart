@@ -36,6 +36,17 @@ class _ExpenseViewState extends State<ExpenseView> {
   AccountEntity? selectedAccount;
   CategoryEntity? selectedCategory;
 
+  void _resetData(BuildContext context) {
+    setState(() {
+      amountController.clear();
+      noteController.clear();
+      isPrivate = false;
+      selectedAccount = null;
+      selectedCategory = null;
+      FocusScope.of(context).unfocus();
+    });
+  }
+
   @override
   void dispose() {
     amountController.dispose();
@@ -53,108 +64,114 @@ class _ExpenseViewState extends State<ExpenseView> {
   Widget build(BuildContext context) {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (context, state) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-          child: Column(
-            children: [
-              // ── Monto ──────────────────────────────────────────
-              TextfieldAmountInput(
-                color: const Color(0xFFF87171),
-                controller: amountController,
-              ),
-              const SizedBox(height: 20),
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: Column(
+              children: [
+                // ── Monto ──────────────────────────────────────────
+                TextfieldAmountInput(
+                  color: const Color(0xFFF87171),
+                  controller: amountController,
+                ),
+                const SizedBox(height: 20),
 
-              // ── Cuenta ─────────────────────────────────────────
-              const SelectionTitle(title: 'CUENTA (con que pagaste)'),
-              const SizedBox(height: 10),
-              HorizontalAccountSelector(
-                selectedAccountId: selectedAccount?.id,
-                onAccountSelected: (account) {
-                  setState(() => selectedAccount = account);
-                },
-              ),
-              const SizedBox(height: 20),
+                // ── Cuenta ─────────────────────────────────────────
+                const SelectionTitle(title: 'CUENTA (con que pagaste)'),
+                const SizedBox(height: 10),
+                HorizontalAccountSelector(
+                  selectedAccountId: selectedAccount?.id,
+                  onAccountSelected: (account) {
+                    setState(() => selectedAccount = account);
+                  },
+                ),
+                const SizedBox(height: 20),
 
-              // ── Categoría ──────────────────────────────────────
-              const SelectionTitle(title: 'CATEGORÍA'),
-              const SizedBox(height: 10),
-              CategorySelector(
-                type: CategoryType.expense,
-                selectedCategoryId: selectedCategory?.id,
-                onCategorySelected: (category) {
-                  setState(() => selectedCategory = category);
-                },
-              ),
-              const SizedBox(height: 15),
+                // ── Categoría ──────────────────────────────────────
+                const SelectionTitle(title: 'CATEGORÍA'),
+                const SizedBox(height: 10),
+                CategorySelector(
+                  type: CategoryType.expense,
+                  selectedCategoryId: selectedCategory?.id,
+                  onCategorySelected: (category) {
+                    setState(() => selectedCategory = category);
+                  },
+                ),
+                const SizedBox(height: 15),
 
-              // ── Nota ───────────────────────────────────────────
-              CustomLabeledTextField(
-                label: 'Nota / Descripción',
-                hint: '¿En qué lo usaste?',
-                controller: noteController,
-              ),
-              const SizedBox(height: 15),
+                // ── Nota ───────────────────────────────────────────
+                CustomLabeledTextField(
+                  label: 'Nota / Descripción',
+                  hint: '¿En qué lo usaste?',
+                  controller: noteController,
+                ),
+                const SizedBox(height: 15),
 
-              // ── Fecha ──────────────────────────────────────────
-              DateTimePicker(
-                selectedDate: dateTime,
-                onDateSelected: (date) => setState(() => dateTime = date),
-              ),
-              const SizedBox(height: 10),
+                // ── Fecha ──────────────────────────────────────────
+                DateTimePicker(
+                  selectedDate: dateTime,
+                  onDateSelected: (date) => setState(() => dateTime = date),
+                ),
+                const SizedBox(height: 10),
 
-              // ── Privado ────────────────────────────────────────
-              PrivateToggle(
-                isPrivate: isPrivate,
-                onPrivateChanged: (v) => setState(() => isPrivate = v),
-              ),
-              const SizedBox(height: 20),
+                // ── Privado ────────────────────────────────────────
+                PrivateToggle(
+                  isPrivate: isPrivate,
+                  onPrivateChanged: (v) => setState(() => isPrivate = v),
+                ),
+                const SizedBox(height: 20),
 
-              // ── Botón Guardar ──────────────────────────────────
-              GenericButton(
-                label: 'Registrar Gasto',
-                onPressed: () {
-                  if (selectedCategory == null) {
-                    _showError('Por favor selecciona una categoría');
-                    return;
-                  }
-                  if (amountController.text.isEmpty) {
-                    _showError('Por favor ingresa un monto');
-                    return;
-                  }
-                  if (selectedAccount == null) {
-                    _showError('Por favor selecciona la cuenta');
-                    return;
-                  }
-
-                  final amount = double.tryParse(amountController.text) ?? 0.0;
-                  if (amount <= 0) {
-                    _showError('El monto debe ser mayor a cero');
-                    return;
-                  }
-
-                  context.read<TransactionBloc>().add(
-                    AddTransactionEvent(
-                      amount: amount,
-                      note: noteController.text,
-                      date: dateTime,
-                      isPrivate: isPrivate,
-                      type: TransactionType.expense,
-                      category: selectedCategory,
-                      account: selectedAccount!,
-                      toAccount: null,
-                    ),
-                  );
-                  Future.delayed(const Duration(milliseconds: 150), () {
-                    if (context.mounted) {
-                      context.read<AccountBloc>().add(LoadAccountsEvent());
-                      context.read<CategoryBloc>().add(LoadCategoriesEvent());
+                // ── Botón Guardar ──────────────────────────────────
+                AnimatedGenericButton(
+                  label: 'Registrar Gasto',
+                  onPressed: () {
+                    if (selectedCategory == null) {
+                      _showError('Por favor selecciona una categoría');
+                      return;
                     }
-                  });
-                },
-                colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
-              ),
-              const SizedBox(height: 40),
-            ],
+                    if (amountController.text.isEmpty) {
+                      _showError('Por favor ingresa un monto');
+                      return;
+                    }
+                    if (selectedAccount == null) {
+                      _showError('Por favor selecciona la cuenta');
+                      return;
+                    }
+
+                    final amount =
+                        double.tryParse(amountController.text) ?? 0.0;
+                    if (amount <= 0) {
+                      _showError('El monto debe ser mayor a cero');
+                      return;
+                    }
+
+                    context.read<TransactionBloc>().add(
+                      AddTransactionEvent(
+                        amount: amount,
+                        note: noteController.text,
+                        date: dateTime,
+                        isPrivate: isPrivate,
+                        type: TransactionType.expense,
+                        category: selectedCategory,
+                        account: selectedAccount!,
+                        toAccount: null,
+                      ),
+                    );
+                    Future.delayed(const Duration(milliseconds: 150), () {
+                      if (context.mounted) {
+                        context.read<AccountBloc>().add(LoadAccountsEvent());
+                        context.read<CategoryBloc>().add(LoadCategoriesEvent());
+                      }
+                    });
+                    _resetData(context);
+                  },
+                  colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+                  type: TransactionType.expense,
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         );
       },

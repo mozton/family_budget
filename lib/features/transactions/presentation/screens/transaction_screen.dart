@@ -69,7 +69,7 @@ class _TransactionScreenState extends State<TransactionScreen>
         children: [
           AnimatedContainer(
             duration: Duration(microseconds: 0),
-            margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: Colors.grey[200],

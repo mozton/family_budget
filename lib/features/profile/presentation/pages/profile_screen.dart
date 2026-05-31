@@ -1,6 +1,11 @@
+import 'package:family_budget/features/accounts/data/models/account_isar_model.dart';
+import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
+import 'package:family_budget/features/transactions/data/models/transaction_isar_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -78,6 +83,58 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 40),
+              // Reset Database
+              GestureDetector(
+                onTap: () async {
+                  final dir = await getApplicationDocumentsDirectory();
+                  final isar =
+                      Isar.getInstance() ??
+                      await Isar.open(
+                        [
+                          CategoryIsarModelSchema,
+                          TransactionIsarModelSchema,
+                          AccountIsarModelSchema,
+                        ], // Aquí pones los schemas que generaste
+                        directory: dir.path,
+                      );
+                  Future<void> clearSpecificData(Isar isar) async {
+                    await isar.writeTxn(() async {
+                      await isar.transactionIsarModels
+                          .clear(); // Vacía transacciones
+                      await isar.accountIsarModels.clear();
+                      await isar.categoryIsarModels.clear(); // Vacía cuentas
+                      // Aquí puedes decidir NO borrar categoryIsarModels para conservar tus categorías
+                    });
+                  }
+
+                  clearSpecificData(isar);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent[100],
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey[100]!),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(TablerIcons.restore, size: 24, color: Colors.black),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Reset Database",
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Ajustes de la cuenta
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 16),

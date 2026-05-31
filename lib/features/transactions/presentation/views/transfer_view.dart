@@ -33,105 +33,125 @@ class _TransferViewState extends State<TransferView> {
   AccountEntity? fromAccount;
   AccountEntity? toAccount;
 
+  void _resetData(BuildContext context) {
+    setState(() {
+      amountController.clear();
+      noteController.clear();
+      isPrivate = false;
+      fromAccount = null;
+      toAccount = null;
+      FocusScope.of(context).unfocus();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          TextfieldAmountInput(
-            color: const Color(0xFF3B82F6),
-            controller: amountController,
-          ),
-          const SelectionTitle(title: 'Transferir desde '),
-          const SizedBox(height: 10),
-          HorizontalAccountSelector(
-            selectedAccountId: fromAccount?.id,
-            onAccountSelected: (account) {
-              setState(() {
-                fromAccount = account;
-              });
-            },
-          ),
-          const SizedBox(height: 15),
-          const SelectionTitle(title: 'Transferir a '),
-          const SizedBox(height: 10),
-          HorizontalAccountSelector(
-            selectedAccountId: toAccount?.id,
-            onAccountSelected: (account) {
-              setState(() {
-                toAccount = account;
-              });
-            },
-          ),
-          const SizedBox(height: 20),
-          CustomLabeledTextField(
-            label: "Nota / Descripción",
-            hint: "¿En qué lo usaste?",
-            controller: noteController,
-          ),
-          const SizedBox(height: 15),
-          DateTimePicker(
-            selectedDate: dateTime,
-            onDateSelected: (date) => setState(() => dateTime = date),
-          ),
-          const SizedBox(height: 15),
-          PrivateToggle(
-            isPrivate: isPrivate,
-            onPrivateChanged: (v) => setState(() => isPrivate = v),
-          ),
-          const SizedBox(height: 15),
-          GenericButton(
-            label: 'Registrar Transferencia', // Cambié el texto
-            onPressed: () {
-              if (fromAccount == null) {
-                _showError('Selecciona la cuenta de origen');
-                return;
-              }
-              if (toAccount == null) {
-                _showError('Selecciona la cuenta de destino');
-                return;
-              }
-              if (fromAccount!.id == toAccount!.id) {
-                _showError('Origen y destino no pueden ser la misma cuenta');
-                return;
-              }
-              if (amountController.text.isEmpty) {
-                _showError('Ingresa un monto');
-                return;
-              }
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              TextfieldAmountInput(
+                color: const Color(0xFF3B82F6),
+                controller: amountController,
+              ),
+              const SelectionTitle(title: 'Transferir desde '),
+              const SizedBox(height: 10),
+              HorizontalAccountSelector(
+                selectedAccountId: fromAccount?.id,
+                onAccountSelected: (account) {
+                  setState(() {
+                    fromAccount = account;
+                  });
+                },
+              ),
+              const SizedBox(height: 15),
+              const SelectionTitle(title: 'Transferir a '),
+              const SizedBox(height: 10),
+              HorizontalAccountSelector(
+                selectedAccountId: toAccount?.id,
+                onAccountSelected: (account) {
+                  setState(() {
+                    toAccount = account;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+              CustomLabeledTextField(
+                label: "Nota / Descripción",
+                hint: "¿En qué lo usaste?",
+                controller: noteController,
+              ),
+              const SizedBox(height: 15),
+              DateTimePicker(
+                selectedDate: dateTime,
+                onDateSelected: (date) => setState(() => dateTime = date),
+              ),
+              const SizedBox(height: 15),
+              PrivateToggle(
+                isPrivate: isPrivate,
+                onPrivateChanged: (v) => setState(() => isPrivate = v),
+              ),
+              const SizedBox(height: 15),
+              AnimatedGenericButton(
+                type: TransactionType.transfer,
+                label: 'Registrar Transferencia', // Cambié el texto
+                onPressed: () {
+                  if (fromAccount == null) {
+                    _showError('Selecciona la cuenta de origen');
+                    return;
+                  }
+                  if (toAccount == null) {
+                    _showError('Selecciona la cuenta de destino');
+                    return;
+                  }
+                  if (fromAccount!.id == toAccount!.id) {
+                    _showError(
+                      'Origen y destino no pueden ser la misma cuenta',
+                    );
+                    return;
+                  }
+                  if (amountController.text.isEmpty) {
+                    _showError('Ingresa un monto');
+                    return;
+                  }
 
-              final amount = double.tryParse(amountController.text) ?? 0.0;
-              if (amount <= 0) {
-                _showError('El monto debe ser mayor a cero');
-                return;
-              }
+                  final amount = double.tryParse(amountController.text) ?? 0.0;
+                  if (amount <= 0) {
+                    _showError('El monto debe ser mayor a cero');
+                    return;
+                  }
 
-              // Disparar evento de transferencia
-              context.read<TransactionBloc>().add(
-                AddTransactionEvent(
-                  amount: amount,
-                  note: noteController.text,
-                  date: dateTime,
-                  isPrivate: isPrivate,
-                  type: TransactionType.transfer,
-                  account: fromAccount!, // entidad completa
-                  toAccount: toAccount!, // entidad completa
-                ),
-              );
-              Future.delayed(const Duration(milliseconds: 150), () {
-                if (context.mounted) {
-                  context.read<AccountBloc>().add(LoadAccountsEvent());
-                  context.read<CategoryBloc>().add(LoadCategoriesEvent());
-                }
-              });
+                  // Disparar evento de transferencia
+                  context.read<TransactionBloc>().add(
+                    AddTransactionEvent(
+                      amount: amount,
+                      note: noteController.text,
+                      date: dateTime,
+                      isPrivate: isPrivate,
+                      type: TransactionType.transfer,
+                      account: fromAccount!, // entidad completa
+                      toAccount: toAccount!, // entidad completa
+                    ),
+                  );
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    if (context.mounted) {
+                      context.read<AccountBloc>().add(LoadAccountsEvent());
+                      context.read<CategoryBloc>().add(LoadCategoriesEvent());
+                    }
+                  });
 
-              Navigator.pop(context);
-            },
-            colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+                  _resetData(context);
+                },
+                colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+              ),
+
+              SizedBox(height: 40),
+            ],
           ),
-
-          SizedBox(height: 40),
-        ],
+        ),
       ),
     );
   }

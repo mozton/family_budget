@@ -37,6 +37,17 @@ class _IncomeViewState extends State<IncomeView> {
   CategoryEntity? selectedCategory;
   AccountEntity? selectedAccount;
 
+  void _resetData(BuildContext context) {
+    setState(() {
+      amountController.clear();
+      noteController.clear();
+      isPrivate = false;
+      selectedAccount = null;
+      selectedCategory = null;
+      FocusScope.of(context).unfocus();
+    });
+  }
+
   @override
   void dispose() {
     amountController.dispose();
@@ -46,88 +57,88 @@ class _IncomeViewState extends State<IncomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-      child: Column(
-        children: [
-          TextfieldAmountInput(
-            color: const Color(0xFF10B981),
-            controller: amountController,
-          ),
-          const SizedBox(height: 15),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Column(
+          children: [
+            TextfieldAmountInput(
+              color: const Color(0xFF10B981),
+              controller: amountController,
+            ),
+            const SizedBox(height: 15),
 
-          const SelectionTitle(title: 'CATEGORÍA'),
-          const SizedBox(height: 10),
-          CategorySelector(
-            type: CategoryType.income,
-            selectedCategoryId: selectedCategory?.id,
-            onCategorySelected: (category) {
-              setState(() => selectedCategory = category);
-            },
-          ),
-          const SizedBox(height: 20),
+            const SelectionTitle(title: 'CATEGORÍA'),
+            const SizedBox(height: 10),
+            CategorySelector(
+              type: CategoryType.income,
+              selectedCategoryId: selectedCategory?.id,
+              onCategorySelected: (category) {
+                setState(() => selectedCategory = category);
+              },
+            ),
+            const SizedBox(height: 20),
 
-          const SelectionTitle(title: 'CUENTA (donde ingreso)'),
-          const SizedBox(height: 10),
-          HorizontalAccountSelector(
-            selectedAccountId: selectedAccount?.id,
-            onAccountSelected: (account) {
-              setState(() => selectedAccount = account);
-            },
-          ),
-          const SizedBox(height: 25),
+            const SelectionTitle(title: 'CUENTA (donde ingreso)'),
+            const SizedBox(height: 10),
+            HorizontalAccountSelector(
+              selectedAccountId: selectedAccount?.id,
+              onAccountSelected: (account) {
+                setState(() => selectedAccount = account);
+              },
+            ),
+            const SizedBox(height: 25),
 
-          CustomLabeledTextField(
-            label: "Nota / Descripción",
-            hint: "¿En qué lo usaste?",
-            controller: noteController,
-          ),
-          const SizedBox(height: 15),
+            CustomLabeledTextField(
+              label: "Nota / Descripción",
+              hint: "¿En qué lo usaste?",
+              controller: noteController,
+            ),
+            const SizedBox(height: 15),
 
-          DateTimePicker(
-            selectedDate: dateTime,
-            onDateSelected: (date) => setState(() => dateTime = date),
-          ),
-          const SizedBox(height: 15),
+            DateTimePicker(
+              selectedDate: dateTime,
+              onDateSelected: (date) => setState(() => dateTime = date),
+            ),
+            const SizedBox(height: 15),
 
-          PrivateToggle(
-            isPrivate: isPrivate,
-            onPrivateChanged: (v) => setState(() => isPrivate = v),
-          ),
-          const SizedBox(height: 15),
+            PrivateToggle(
+              isPrivate: isPrivate,
+              onPrivateChanged: (v) => setState(() => isPrivate = v),
+            ),
+            const SizedBox(height: 15),
 
-          // En lib/features/transactions/presentation/views/income_view.dart y expense_view.dart
-          GenericButton(
-            label: 'Registrar Ingreso', // o Gasto
-            onPressed: () {
-              // ... tus validaciones (if category == null, etc.) ...
+            AnimatedGenericButton(
+              type: TransactionType.income,
+              label: 'Registrar Ingreso', // o Gasto
+              onPressed: () {
+                final amount = double.tryParse(amountController.text) ?? 0.0;
 
-              final amount = double.tryParse(amountController.text) ?? 0.0;
-
-              // 1. Guardar la transacción
-              context.read<TransactionBloc>().add(
-                AddTransactionEvent(
-                  amount: amount,
-                  note: noteController.text,
-                  date: dateTime,
-                  isPrivate: isPrivate,
-                  type: TransactionType.income, // o expense
-                  category: selectedCategory,
-                  account: selectedAccount!,
-                  toAccount: null,
-                ),
-              );
-              Future.delayed(const Duration(milliseconds: 150), () {
-                if (context.mounted) {
-                  context.read<AccountBloc>().add(LoadAccountsEvent());
-                  context.read<CategoryBloc>().add(LoadCategoriesEvent());
-                }
-              });
-              Navigator.pop(context);
-            },
-            colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
-          ),
-        ],
+                context.read<TransactionBloc>().add(
+                  AddTransactionEvent(
+                    amount: amount,
+                    note: noteController.text,
+                    date: dateTime,
+                    isPrivate: isPrivate,
+                    type: TransactionType.income, // o expense
+                    category: selectedCategory,
+                    account: selectedAccount!,
+                    toAccount: null,
+                  ),
+                );
+                Future.delayed(const Duration(milliseconds: 150), () {
+                  if (context.mounted) {
+                    context.read<AccountBloc>().add(LoadAccountsEvent());
+                    context.read<CategoryBloc>().add(LoadCategoriesEvent());
+                  }
+                });
+                _resetData(context);
+              },
+              colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+            ),
+          ],
+        ),
       ),
     );
   }
