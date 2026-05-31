@@ -21,9 +21,9 @@ class CategoryState {
   }) {
     return CategoryState(
       categories: categories ?? this.categories,
-      selectedCategory: selectedCategory ?? selectedCategory,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage ?? errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }

@@ -177,7 +177,7 @@ CategoryIsarModel _categoryIsarModelDeserialize(
   object.targetAmount = reader.readDouble(offsets[8]);
   object.type =
       _CategoryIsarModeltypeValueEnumMap[reader.readByteOrNull(offsets[9])] ??
-          CategoryType.expense;
+          CategoryType.income;
   return object;
 }
 
@@ -209,19 +209,19 @@ P _categoryIsarModelDeserializeProp<P>(
     case 9:
       return (_CategoryIsarModeltypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
-          CategoryType.expense) as P;
+          CategoryType.income) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _CategoryIsarModeltypeEnumValueMap = {
-  'expense': 0,
-  'income': 1,
+  'income': 0,
+  'expense': 1,
 };
 const _CategoryIsarModeltypeValueEnumMap = {
-  0: CategoryType.expense,
-  1: CategoryType.income,
+  0: CategoryType.income,
+  1: CategoryType.expense,
 };
 
 Id _categoryIsarModelGetId(CategoryIsarModel object) {

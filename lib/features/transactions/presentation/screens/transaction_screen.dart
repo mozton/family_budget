@@ -20,7 +20,7 @@ class _TransactionScreenState extends State<TransactionScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
 
     // Escucha los cambios de pestaña
     _tabController.addListener(() {
@@ -32,18 +32,18 @@ class _TransactionScreenState extends State<TransactionScreen>
     });
   }
 
-  Color _getBackgroundColor() {
-    switch (_currentIndex) {
-      case 0:
-        return const Color(0xFFF87171);
-      case 1:
-        return const Color(0xFF10B981);
-      case 2:
-        return const Color(0xFF3B82F6);
-      default:
-        return Colors.grey;
-    }
-  }
+  // Color _getBackgroundColor() {
+  //   switch (_currentIndex) {
+  //     case 0:
+  //       return const Color(0xFFF87171);
+  //     case 1:
+  //       return const Color(0xFF10B981);
+  //     case 2:
+  //       return const Color(0xFF3B82F6);
+  //     default:
+  //       return Colors.grey;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +111,7 @@ class _TransactionScreenState extends State<TransactionScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [const ExpenseView(), IncomeView(), TransferView()],
+              children: [ExpenseView(), IncomeView(), TransferView()],
             ),
           ),
         ],

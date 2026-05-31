@@ -44,7 +44,7 @@ extension AccountEntityMapper on entity.AccountEntity {
       ..balance = balance
       ..isPrivate = isPrivate
       ..ownerId = ownerId
-      // 💡 Asignación directa del enum:
+      ..date = DateTime.now()
       ..type = type;
 
     if (parsedId != null) {

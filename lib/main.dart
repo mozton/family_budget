@@ -52,14 +52,16 @@ void main() async {
 
   // 2. INICIALIZAR ISAR (La base de datos real)
   final dir = await getApplicationDocumentsDirectory();
-  final isar = await Isar.open(
-    [
-      CategoryIsarModelSchema,
-      TransactionIsarModelSchema,
-      AccountIsarModelSchema,
-    ], // Aquí pones los schemas que generaste
-    directory: dir.path,
-  );
+  final isar =
+      Isar.getInstance() ??
+      await Isar.open(
+        [
+          CategoryIsarModelSchema,
+          TransactionIsarModelSchema,
+          AccountIsarModelSchema,
+        ], // Aquí pones los schemas que generaste
+        directory: dir.path,
+      );
 
   // 3. INYECTAR DATA SOURCE (Pasamos la instancia de Isar)
   // Aquí usamos la implementación (Impl), no la interfaz.
@@ -106,7 +108,16 @@ void main() async {
             getCategoriesUseCase,
             deleteCategoryUseCase,
             updateCategoryUseCase,
-          )..add(LoadCategories()),
+          )..add(LoadCategoriesEvent()),
+        ),
+
+        BlocProvider(
+          create: (_) => AccountBloc(
+            getAccountsUseCase: getAccountsUseCase,
+            saveAccountUseCase: saveAccountUseCase,
+            updateAccountUseCase: updateAccountUseCase,
+            deleteAccountUseCase: deleteAccountUseCase,
+          )..add(LoadAccountsEvent()),
         ),
         BlocProvider(
           create: (_) => TransactionBloc(
@@ -114,14 +125,6 @@ void main() async {
             getTransactionsUseCase,
             updateTransactionUseCase,
           )..add(GetTransactionsEvent()),
-        ),
-        BlocProvider(
-          create: (_) => AccountBloc(
-            getAccountsUseCase: getAccountsUseCase,
-            saveAccountUseCase: saveAccountUseCase,
-            updateAccountUseCase: updateAccountUseCase,
-            deleteAccountUseCase: deleteAccountUseCase,
-          )..add(GetAccountsEvent()),
         ),
       ],
       child: const MyApp(),

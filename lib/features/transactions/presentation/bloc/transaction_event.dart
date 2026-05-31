@@ -5,7 +5,7 @@ import 'package:family_budget/features/transactions/domiain/entities/transaction
 abstract class TransactionEvent {}
 
 class AddTransactionEvent extends TransactionEvent {
-  final CategoryEntity category;
+  final CategoryEntity? category;
   final AccountEntity account;
   final AccountEntity? toAccount;
   final double amount;
@@ -15,7 +15,7 @@ class AddTransactionEvent extends TransactionEvent {
   final TransactionType type;
 
   AddTransactionEvent({
-    required this.category,
+    this.category,
     required this.amount,
     required this.note,
     required this.date,

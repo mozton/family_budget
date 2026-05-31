@@ -1,3 +1,4 @@
+import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/custom_type_selector.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
@@ -230,16 +231,18 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  _buildCustomTextField(
-                    "Nombre de la categoría",
-                    "Ej. Compras",
-                    titleController,
+                  _buildTypeSelector(),
+                  const SizedBox(height: 20),
+                  CustomLabeledTextField(
+                    label: 'Nombre de la Categoria',
+                    hint: 'Ej: Compras',
+                    controller: titleController,
                   ),
                   const SizedBox(height: 20),
-                  _buildCustomCurrencyField(
-                    "Presupuesto de la categoría",
-                    "Ej. 5000",
-                    limitController,
+                  CustomLabeledTextField(
+                    label: 'Presupuesto de la Categoria',
+                    hint: 'Ej. 5,000.00',
+                    controller: titleController,
                   ),
 
                   const SizedBox(height: 20),
@@ -247,8 +250,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                   const SizedBox(height: 30),
                   _buildColorPicker(),
                   const SizedBox(height: 30),
-                  _buildTypeSelector(),
-                  const SizedBox(height: 40),
+
                   _buildSubmitButton(),
                 ],
               ),
@@ -388,136 +390,6 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
     );
   }
 
-  Widget _buildCustomTextField(
-    String label,
-    String hint,
-    TextEditingController controller,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[500],
-            ),
-          ),
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: GoogleFonts.quicksand(
-                color: Colors.grey[400],
-                fontWeight: FontWeight.w600,
-              ),
-              border: InputBorder.none,
-              isDense: true,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCustomCurrencyField(
-    String label,
-    String hint,
-    TextEditingController controller,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[500],
-            ),
-          ),
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: GoogleFonts.quicksand(
-                color: Colors.grey[400],
-                fontWeight: FontWeight.w600,
-              ),
-              border: InputBorder.none,
-              isDense: true,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Widget _buildColorPicker() {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text(
-  //         "COLOR DE LA CATEGORÍA".toUpperCase(),
-  //         style: GoogleFonts.quicksand(
-  //           fontSize: 10,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.grey[500],
-  //         ),
-  //       ),
-  //       const SizedBox(height: 16),
-  //       Wrap(
-  //         spacing: 16,
-  //         runSpacing: 16,
-  //         children: colors.map((color) {
-  //           final isSelected = colorSelected == color;
-  //           return GestureDetector(
-  //             onTap: () => setState(() => colorSelected = color),
-  //             child: AnimatedContainer(
-  //               duration: const Duration(milliseconds: 200),
-  //               width: 44,
-  //               height: 44,
-  //               decoration: BoxDecoration(
-  //                 color: color,
-  //                 shape: BoxShape.circle,
-  //                 border: isSelected
-  //                     ? Border.all(color: Colors.grey[300]!, width: 3)
-  //                     : null,
-  //                 boxShadow: isSelected
-  //                     ? [
-  //                         BoxShadow(
-  //                           color: color.withValues(alpha: .4),
-  //                           blurRadius: 8,
-  //                           offset: const Offset(0, 4),
-  //                         ),
-  //                       ]
-  //                     : [],
-  //               ),
-  //               child: isSelected
-  //                   ? const Icon(Icons.check, color: Colors.white, size: 24)
-  //                   : null,
-  //             ),
-  //           );
-  //         }).toList(),
-  //       ),
-  //     ],
-  //   );
-  // }
   Widget _buildColorPicker() {
     return Container(
       padding: const EdgeInsets.only(top: 16, bottom: 16, left: 16),
@@ -552,7 +424,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                     Colors.white,
                     Colors.transparent,
                   ],
-                  stops: [0.0, 0.05, 0.95, 1.0],
+                  stops: [0.0, 0.03, 0.95, 1.0],
                 ).createShader(bounds);
               },
               blendMode: BlendMode.dstIn,

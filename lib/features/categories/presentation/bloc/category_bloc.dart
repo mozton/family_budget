@@ -39,22 +39,22 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         remoteId: newRemoteId,
       );
       await usecaseSave.saveCategory(newCategory);
-      add(LoadCategories());
+      add(LoadCategoriesEvent());
     });
 
     on<DeleteCategoryEvent>((event, emit) async {
       await usecaseDelete(event.name);
-      add(LoadCategories());
+      add(LoadCategoriesEvent());
     });
 
-    on<LoadCategories>((event, emit) async {
+    on<LoadCategoriesEvent>((event, emit) async {
       final categories = await usecaseGet.getCategories();
       emit(CategoryState(categories: categories));
     });
 
     on<UpdateCategoryEvent>((event, emit) async {
       await usecaseUpdate.updateCategory(event.category);
-      add(LoadCategories());
+      add(LoadCategoriesEvent());
     });
 
     on<SelectedCategoryEvent>((event, emit) {

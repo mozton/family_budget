@@ -28,7 +28,7 @@ class DeleteCategoryEvent extends CategoryEvent {
   DeleteCategoryEvent(this.name);
 }
 
-class LoadCategories extends CategoryEvent {}
+class LoadCategoriesEvent extends CategoryEvent {}
 
 class UpdateCategoryEvent extends CategoryEvent {
   final CategoryEntity category;

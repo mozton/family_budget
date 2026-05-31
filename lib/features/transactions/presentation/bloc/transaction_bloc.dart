@@ -8,6 +8,7 @@ import 'package:family_budget/features/transactions/domiain/usecases/update_tran
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_state.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final SaveTransaction saveTransactionUseCase;
@@ -32,17 +33,23 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       );
 
       try {
+        // Recuerda importar el paquete uuid al inicio del archivo si vas a generar el remoteId:
+        // import 'package:uuid/uuid.dart';
+
         final newTransaction = TransactionEntity(
-          category: event.category,
-          toAccount: event.toAccount,
-          account: event.account,
+          id: '',
+          remoteId: const Uuid().v4(),
           amount: event.amount,
           note: event.note,
-          isPrivate: event.isPrivate,
           date: event.date,
+          isPrivate: event.isPrivate,
+          ownerId: 'default_owner',
+
+          category: event.category,
+          account: event.account,
+          toAccount: event.toAccount,
           transactionType: event.type,
         );
-
         await saveTransactionUseCase.saveTransaction(newTransaction);
 
         emit(

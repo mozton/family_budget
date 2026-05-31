@@ -1,27 +1,35 @@
-import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
-import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/categories/presentation/widgets/add_category_button.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_item.dart';
-import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CategorySelector extends StatelessWidget {
   final CategoryType type;
 
-  const CategorySelector({super.key, required this.type});
+  /// ID de la categoría seleccionada, controlado por el widget padre.
+  final String? selectedCategoryId;
+
+  /// Callback que se invoca cuando el usuario selecciona una categoría.
+  final ValueChanged<CategoryEntity>? onCategorySelected;
+
+  const CategorySelector({
+    super.key,
+    required this.type,
+    this.selectedCategoryId,
+    this.onCategorySelected,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (context, state) {
         final filteredCategories = state.categories
-            .where((category) => category.type == type)
+            .where((c) => c.type == type)
             .toList();
+
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -31,26 +39,40 @@ class CategorySelector extends StatelessWidget {
             crossAxisSpacing: 1,
             childAspectRatio: 0.9,
           ),
+          // +1 para el botón "NUEVO" al final
           itemCount: filteredCategories.length + 1,
           itemBuilder: (context, index) {
+            // Último slot → botón "NUEVO"
             if (index == filteredCategories.length) {
-              return AddCategoryButton(onTap: () {}, name: 'NUEVO');
+              return AddCategoryButton(
+                name: 'NUEVO',
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/new_category',
+                    arguments: {
+                      'type': type == CategoryType.expense
+                          ? 'expense'
+                          : 'income',
+                      'title': 'Nueva Categoría',
+                      'action': 'Guardar Categoría',
+                    },
+                  );
+                },
+              );
             }
+
             final category = filteredCategories[index];
+            final isSelected = selectedCategoryId == category.id;
+
             return CategoryItem(
               name: category.name,
               icon: category.icon,
               type: category.type!,
               color: category.color ?? const Color(0xFF9333EA),
-
-              isSelected: state.selectedCategory == category.id,
-
-              onTap: () {
-                context.read<CategoryBloc>().add(
-                  SelectedCategoryEvent(category.id),
-                );
-              },
-
+              isSelected: isSelected,
+              amount: category.currentAmount,
+              onTap: () => onCategorySelected?.call(category),
               onLongPress: () {},
             );
           },

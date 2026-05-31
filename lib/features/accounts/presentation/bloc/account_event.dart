@@ -2,7 +2,7 @@ import 'package:family_budget/features/accounts/domain/entities/account_entity.d
 
 abstract class AccountEvent {}
 
-class GetAccountsEvent extends AccountEvent {}
+class LoadAccountsEvent extends AccountEvent {}
 
 class CreateAccountEvent extends AccountEvent {
   final AccountEntity account;
@@ -22,4 +22,9 @@ class DeleteAccountEvent extends AccountEvent {
 class SelectAccountEvent extends AccountEvent {
   final String accountName;
   SelectAccountEvent(this.accountName);
+}
+
+class SelectToAccountEven extends AccountEvent {
+  final String toAccountName;
+  SelectToAccountEven(this.toAccountName);
 }

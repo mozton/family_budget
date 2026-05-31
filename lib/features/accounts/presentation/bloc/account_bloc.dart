@@ -20,16 +20,16 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     required this.updateAccountUseCase,
     required this.deleteAccountUseCase,
   }) : super(const AccountState()) {
-    on<GetAccountsEvent>(_onGetAccounts);
+    on<LoadAccountsEvent>(_onGetAccounts);
     on<CreateAccountEvent>(_onCreateAccount);
     on<UpdateAccountEvent>(_onUpdateAccount);
     on<DeleteAccountEvent>(_onDeleteAccount);
-
     on<SelectAccountEvent>(_onSelectAccount);
+    on<SelectToAccountEven>(_onSelectToAccount);
   }
 
   Future<void> _onGetAccounts(
-    GetAccountsEvent event,
+    LoadAccountsEvent event,
     Emitter<AccountState> emit,
   ) async {
     emit(state.copyWith(isLoading: true, error: null));
@@ -68,8 +68,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       await saveAccountUseCase.call(accountToSave);
 
       // Recargamos la lista automáticamente
-      add(GetAccountsEvent());
-    } catch (e) {
+      add(LoadAccountsEvent());
+    } catch (e, st) {
+      print(' Error al crear cuenta: $e\n$st');
       emit(
         state.copyWith(
           isLoading: false,
@@ -86,7 +87,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     emit(state.copyWith(isLoading: true, error: null));
     try {
       await updateAccountUseCase.call(event.account);
-      add(GetAccountsEvent());
+      add(LoadAccountsEvent());
     } catch (e) {
       emit(
         state.copyWith(
@@ -104,7 +105,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     emit(state.copyWith(isLoading: true, error: null));
     try {
       await deleteAccountUseCase.call(event.accountId);
-      add(GetAccountsEvent());
+      add(LoadAccountsEvent());
     } catch (e) {
       emit(
         state.copyWith(
@@ -117,5 +118,12 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
   void _onSelectAccount(SelectAccountEvent event, Emitter<AccountState> emit) {
     emit(state.copyWith(selectAcount: event.accountName));
+  }
+
+  void _onSelectToAccount(
+    SelectToAccountEven event,
+    Emitter<AccountState> emit,
+  ) {
+    emit(state.copyWith(selectToAccount: event.toAccountName));
   }
 }

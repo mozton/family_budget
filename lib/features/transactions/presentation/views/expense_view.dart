@@ -3,9 +3,10 @@ import 'package:family_budget/core/widgets/date_time_picker.dart';
 import 'package:family_budget/core/widgets/horizontal_account_selector.dart';
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
-import 'package:family_budget/features/accounts/presentation/bloc/account_state.dart';
+import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_selector.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
@@ -26,11 +27,14 @@ class ExpenseView extends StatefulWidget {
 }
 
 class _ExpenseViewState extends State<ExpenseView> {
-  // 💡 CORRECCIÓN 1: Los controladores y el estado deben ir AQUÍ, fuera del método build
   final TextEditingController amountController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
   DateTime dateTime = DateTime.now();
   bool isPrivate = false;
+
+  // Estado local — persiste entre rebuilds del widget
+  AccountEntity? selectedAccount;
+  CategoryEntity? selectedCategory;
 
   @override
   void dispose() {
@@ -39,127 +43,121 @@ class _ExpenseViewState extends State<ExpenseView> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<CategoryBloc, CategoryState>(
-      builder: (context, categoryState) {
-        return BlocBuilder<AccountBloc, AccountState>(
-          builder: (context, accountState) {
-            // 1. Leemos los Strings (IDs o Nombres) que tienes en el estado
-            final accountString = accountState.selectAccount;
-            final categoryString = categoryState.selectedCategory;
-
-            // 2. 💡 SOLUCIÓN: Buscamos la ENTIDAD COMPLETA en la lista correspondiente
-            AccountEntity? fullAccount;
-            if (accountString != null) {
-              try {
-                // Busca coincidencia por ID o Nombre
-                fullAccount = accountState.accounts.firstWhere(
-                  (a) => a.id == accountString || a.name == accountString,
-                );
-              } catch (_) {
-                fullAccount = null;
-              }
-            }
-
-            CategoryEntity? fullCategory;
-            if (categoryString != null) {
-              try {
-                fullCategory = categoryState.categories.firstWhere(
-                  (c) => c.id == categoryString || c.name == categoryString,
-                );
-              } catch (_) {
-                fullCategory = null;
-              }
-            }
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-              child: Column(
-                children: [
-                  TextfieldAmountInput(
-                    color: const Color(0xFFF87171),
-                    controller: amountController,
-                  ),
-                  const SizedBox(height: 15),
-
-                  const SelectionTitle(title: 'CUENTA (con que pagaste)'),
-                  const SizedBox(height: 15),
-                  const HorizontalAccountSelector(),
-
-                  const SizedBox(height: 25),
-
-                  const SelectionTitle(title: 'CATEGORÍA'),
-                  const SizedBox(height: 15),
-                  CategorySelector(type: CategoryType.expense),
-
-                  CustomLabeledTextField(
-                    label: "Nota / Descripción",
-                    hint: "¿En qué lo usaste?",
-                    controller: noteController,
-                  ),
-                  const SizedBox(height: 15),
-
-                  DateTimePicker(
-                    selectedDate: dateTime,
-                    onDateSelected: (date) => setState(() => dateTime = date),
-                  ),
-                  PrivateToggle(
-                    isPrivate: isPrivate,
-                    onPrivateChanged: (v) => setState(() => isPrivate = v),
-                  ),
-                  const SizedBox(height: 15),
-
-                  GenericButton(
-                    label: 'Registrar Gasto',
-                    onPressed: () {
-                      // Validaciones usamos las entidades completas
-                      if (fullCategory == null) {
-                        _showError('Por favor selecciona una categoría');
-                        return;
-                      }
-                      if (amountController.text.isEmpty) {
-                        _showError('Por favor ingresa un monto');
-                        return;
-                      }
-                      if (fullAccount == null) {
-                        _showError('Por favor selecciona la cuenta');
-                        return;
-                      }
-
-                      // 3. Enviamos las entidades COMPLETAS al evento
-                      context.read<TransactionBloc>().add(
-                        AddTransactionEvent(
-                          amount: double.tryParse(amountController.text) ?? 0.0,
-                          note: noteController.text,
-                          date: dateTime,
-                          isPrivate: isPrivate,
-                          type: TransactionType.expense,
-                          category:
-                              fullCategory, // Entidad de Categoría completa
-                          account: fullAccount, // Entidad de Cuenta completa
-                          toAccount: null,
-                        ),
-                      );
-                      print(fullAccount.name);
-
-                      // Opcional: Navegar hacia atrás después de registrar
-                      Navigator.pop(context);
-                    },
-                    colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CategoryBloc, CategoryState>(
+      builder: (context, state) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          child: Column(
+            children: [
+              // ── Monto ──────────────────────────────────────────
+              TextfieldAmountInput(
+                color: const Color(0xFFF87171),
+                controller: amountController,
+              ),
+              const SizedBox(height: 20),
+
+              // ── Cuenta ─────────────────────────────────────────
+              const SelectionTitle(title: 'CUENTA (con que pagaste)'),
+              const SizedBox(height: 10),
+              HorizontalAccountSelector(
+                selectedAccountId: selectedAccount?.id,
+                onAccountSelected: (account) {
+                  setState(() => selectedAccount = account);
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // ── Categoría ──────────────────────────────────────
+              const SelectionTitle(title: 'CATEGORÍA'),
+              const SizedBox(height: 10),
+              CategorySelector(
+                type: CategoryType.expense,
+                selectedCategoryId: selectedCategory?.id,
+                onCategorySelected: (category) {
+                  setState(() => selectedCategory = category);
+                },
+              ),
+              const SizedBox(height: 15),
+
+              // ── Nota ───────────────────────────────────────────
+              CustomLabeledTextField(
+                label: 'Nota / Descripción',
+                hint: '¿En qué lo usaste?',
+                controller: noteController,
+              ),
+              const SizedBox(height: 15),
+
+              // ── Fecha ──────────────────────────────────────────
+              DateTimePicker(
+                selectedDate: dateTime,
+                onDateSelected: (date) => setState(() => dateTime = date),
+              ),
+              const SizedBox(height: 10),
+
+              // ── Privado ────────────────────────────────────────
+              PrivateToggle(
+                isPrivate: isPrivate,
+                onPrivateChanged: (v) => setState(() => isPrivate = v),
+              ),
+              const SizedBox(height: 20),
+
+              // ── Botón Guardar ──────────────────────────────────
+              GenericButton(
+                label: 'Registrar Gasto',
+                onPressed: () {
+                  if (selectedCategory == null) {
+                    _showError('Por favor selecciona una categoría');
+                    return;
+                  }
+                  if (amountController.text.isEmpty) {
+                    _showError('Por favor ingresa un monto');
+                    return;
+                  }
+                  if (selectedAccount == null) {
+                    _showError('Por favor selecciona la cuenta');
+                    return;
+                  }
+
+                  final amount = double.tryParse(amountController.text) ?? 0.0;
+                  if (amount <= 0) {
+                    _showError('El monto debe ser mayor a cero');
+                    return;
+                  }
+
+                  context.read<TransactionBloc>().add(
+                    AddTransactionEvent(
+                      amount: amount,
+                      note: noteController.text,
+                      date: dateTime,
+                      isPrivate: isPrivate,
+                      type: TransactionType.expense,
+                      category: selectedCategory,
+                      account: selectedAccount!,
+                      toAccount: null,
+                    ),
+                  );
+                  Future.delayed(const Duration(milliseconds: 150), () {
+                    if (context.mounted) {
+                      context.read<AccountBloc>().add(LoadAccountsEvent());
+                      context.read<CategoryBloc>().add(LoadCategoriesEvent());
+                    }
+                  });
+                },
+                colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

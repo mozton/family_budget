@@ -3,10 +3,12 @@ import 'package:family_budget/core/widgets/date_time_picker.dart';
 import 'package:family_budget/core/widgets/horizontal_account_selector.dart';
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
-import 'package:family_budget/features/accounts/presentation/bloc/account_state.dart';
+import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
+
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
-import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
+import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
+
 import 'package:family_budget/features/categories/presentation/widgets/category_selector.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
@@ -26,11 +28,14 @@ class IncomeView extends StatefulWidget {
 }
 
 class _IncomeViewState extends State<IncomeView> {
-  // 💡 CORRECCIÓN 1: Los controladores y el estado deben ir AQUÍ, fuera del método build
   final TextEditingController amountController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
   DateTime dateTime = DateTime.now();
   bool isPrivate = false;
+
+  // Variables locales para almacenar las entidades seleccionadas
+  CategoryEntity? selectedCategory;
+  AccountEntity? selectedAccount;
 
   @override
   void dispose() {
@@ -41,125 +46,95 @@ class _IncomeViewState extends State<IncomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CategoryBloc, CategoryState>(
-      builder: (context, categoryState) {
-        return BlocBuilder<AccountBloc, AccountState>(
-          builder: (context, accountState) {
-            // 1. Leemos los Strings (IDs o Nombres) que tienes en el estado
-            final accountString = accountState.selectAccount;
-            final categoryString = categoryState.selectedCategory;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      child: Column(
+        children: [
+          TextfieldAmountInput(
+            color: const Color(0xFF10B981),
+            controller: amountController,
+          ),
+          const SizedBox(height: 15),
 
-            // 2. 💡 SOLUCIÓN: Buscamos la ENTIDAD COMPLETA en la lista correspondiente
-            AccountEntity? fullAccount;
-            if (accountString != null) {
-              try {
-                // Busca coincidencia por ID o Nombre
-                fullAccount = accountState.accounts.firstWhere(
-                  (a) => a.id == accountString || a.name == accountString,
-                );
-              } catch (_) {
-                fullAccount = null;
-              }
-            }
+          const SelectionTitle(title: 'CATEGORÍA'),
+          const SizedBox(height: 10),
+          CategorySelector(
+            type: CategoryType.income,
+            selectedCategoryId: selectedCategory?.id,
+            onCategorySelected: (category) {
+              setState(() => selectedCategory = category);
+            },
+          ),
+          const SizedBox(height: 20),
 
-            CategoryEntity? fullCategory;
-            if (categoryString != null) {
-              try {
-                fullCategory = categoryState.categories.firstWhere(
-                  (c) => c.id == categoryString || c.name == categoryString,
-                );
-              } catch (_) {
-                fullCategory = null;
-              }
-            }
+          const SelectionTitle(title: 'CUENTA (donde ingreso)'),
+          const SizedBox(height: 10),
+          HorizontalAccountSelector(
+            selectedAccountId: selectedAccount?.id,
+            onAccountSelected: (account) {
+              setState(() => selectedAccount = account);
+            },
+          ),
+          const SizedBox(height: 25),
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-              child: Column(
-                children: [
-                  TextfieldAmountInput(
-                    color: const Color(0xFFF87171),
-                    controller: amountController,
-                  ),
-                  const SizedBox(height: 15),
+          CustomLabeledTextField(
+            label: "Nota / Descripción",
+            hint: "¿En qué lo usaste?",
+            controller: noteController,
+          ),
+          const SizedBox(height: 15),
 
-                  const SizedBox(height: 25),
+          DateTimePicker(
+            selectedDate: dateTime,
+            onDateSelected: (date) => setState(() => dateTime = date),
+          ),
+          const SizedBox(height: 15),
 
-                  const SelectionTitle(title: 'CATEGORÍA'),
-                  const SizedBox(height: 15),
-                  const CategorySelector(type: CategoryType.income),
-                  const SelectionTitle(title: 'CUENTA (donde ingreso)'),
-                  const SizedBox(height: 15),
-                  const HorizontalAccountSelector(),
-                  const SizedBox(height: 25),
-                  CustomLabeledTextField(
-                    label: "Nota / Descripción",
-                    hint: "¿En qué lo usaste?",
-                    controller: noteController,
-                  ),
-                  const SizedBox(height: 15),
+          PrivateToggle(
+            isPrivate: isPrivate,
+            onPrivateChanged: (v) => setState(() => isPrivate = v),
+          ),
+          const SizedBox(height: 15),
 
-                  DateTimePicker(
-                    selectedDate: dateTime,
-                    onDateSelected: (date) => setState(() => dateTime = date),
-                  ),
-                  const SizedBox(height: 15),
-                  PrivateToggle(
-                    isPrivate: isPrivate,
-                    onPrivateChanged: (v) => setState(() => isPrivate = v),
-                  ),
-                  const SizedBox(height: 15),
+          // En lib/features/transactions/presentation/views/income_view.dart y expense_view.dart
+          GenericButton(
+            label: 'Registrar Ingreso', // o Gasto
+            onPressed: () {
+              // ... tus validaciones (if category == null, etc.) ...
 
-                  GenericButton(
-                    label: 'Registrar Gasto',
-                    onPressed: () {
-                      // Validaciones usamos las entidades completas
-                      if (fullCategory == null) {
-                        _showError('Por favor selecciona una categoría');
-                        return;
-                      }
-                      if (amountController.text.isEmpty) {
-                        _showError('Por favor ingresa un monto');
-                        return;
-                      }
-                      if (fullAccount == null) {
-                        _showError('Por favor selecciona la cuenta');
-                        return;
-                      }
+              final amount = double.tryParse(amountController.text) ?? 0.0;
 
-                      // 3. Enviamos las entidades COMPLETAS al evento
-                      context.read<TransactionBloc>().add(
-                        AddTransactionEvent(
-                          amount: double.tryParse(amountController.text) ?? 0.0,
-                          note: noteController.text,
-                          date: dateTime,
-                          isPrivate: isPrivate,
-                          type: TransactionType.income,
-                          category:
-                              fullCategory, // Entidad de Categoría completa
-                          account: fullAccount, // Entidad de Cuenta completa
-                          toAccount: null,
-                        ),
-                      );
-                      print(fullAccount.name);
-
-                      // Opcional: Navegar hacia atrás después de registrar
-                      Navigator.pop(context);
-                    },
-                    colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+              // 1. Guardar la transacción
+              context.read<TransactionBloc>().add(
+                AddTransactionEvent(
+                  amount: amount,
+                  note: noteController.text,
+                  date: dateTime,
+                  isPrivate: isPrivate,
+                  type: TransactionType.income, // o expense
+                  category: selectedCategory,
+                  account: selectedAccount!,
+                  toAccount: null,
+                ),
+              );
+              Future.delayed(const Duration(milliseconds: 150), () {
+                if (context.mounted) {
+                  context.read<AccountBloc>().add(LoadAccountsEvent());
+                  context.read<CategoryBloc>().add(LoadCategoriesEvent());
+                }
+              });
+              Navigator.pop(context);
+            },
+            colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+          ),
+        ],
+      ),
     );
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 }

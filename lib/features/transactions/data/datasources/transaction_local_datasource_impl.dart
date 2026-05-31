@@ -13,58 +13,95 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
   @override
   Future<void> saveTransaction(TransactionIsarModel transaction) async {
     await isar.writeTxn(() async {
-      // 1. Resolver Categoría
+      // 1. ACTUALIZAR CATEGORÍA (Solo aplica para Gastos/Ingresos)
       if (transaction.category.value != null) {
-        final catRemoteId = transaction.category.value!.remoteId;
-        final existingCategory = await isar.categoryIsarModels
-            .filter()
-            .remoteIdEqualTo(catRemoteId)
-            .findFirst();
-        if (existingCategory != null)
-          transaction.category.value = existingCategory;
+        final catVal = transaction.category.value!;
+        CategoryIsarModel? existingCat;
+
+        if (catVal.id != Isar.autoIncrement) {
+          existingCat = await isar.categoryIsarModels.get(catVal.id);
+        }
+        if (existingCat == null && catVal.remoteId != null) {
+          existingCat = await isar.categoryIsarModels
+              .filter()
+              .remoteIdEqualTo(catVal.remoteId)
+              .findFirst();
+        }
+
+        if (existingCat != null) {
+          transaction.category.value = existingCat;
+
+          // 🔑 Sumar al balance de la categoría
+          if (transaction.type == TransactionType.expense) {
+            existingCat.currentAmount += transaction.amount;
+          } else if (transaction.type == TransactionType.income) {
+            // Opcional: restar o sumar según como manejes tus presupuestos de ingreso
+            existingCat.currentAmount += transaction.amount;
+          }
+
+          // 💾 Guardar el nuevo saldo de la categoría en Isar
+          await isar.categoryIsarModels.put(existingCat);
+        }
       }
 
-      // 2. APLICAR IMPACTO A LAS CUENTAS (Matemática Financiera)
+      // 2. ACTUALIZAR CUENTA ORIGEN (Gastos, Ingresos, Transferencias)
       if (transaction.account.value != null) {
-        final accRemoteId = transaction.account.value!.remoteId;
-        final existingAcc = await isar.accountIsarModels
-            .filter()
-            .remoteIdEqualTo(accRemoteId)
-            .findFirst();
+        final accVal = transaction.account.value!;
+        AccountIsarModel? existingAcc;
+
+        if (accVal.id != Isar.autoIncrement) {
+          existingAcc = await isar.accountIsarModels.get(accVal.id);
+        }
+        if (existingAcc == null && accVal.remoteId != null) {
+          existingAcc = await isar.accountIsarModels
+              .filter()
+              .remoteIdEqualTo(accVal.remoteId)
+              .findFirst();
+        }
 
         if (existingAcc != null) {
           transaction.account.value = existingAcc;
 
-          // Actualizamos el saldo de la cuenta principal
+          // 🔑 Lógica del dinero
           if (transaction.type == TransactionType.expense) {
             existingAcc.balance -= transaction.amount;
           } else if (transaction.type == TransactionType.income) {
             existingAcc.balance += transaction.amount;
           } else if (transaction.type == TransactionType.transfer) {
-            existingAcc.balance -= transaction.amount; // De aquí sale el dinero
+            existingAcc.balance -= transaction.amount; // De aquí sale
           }
+
+          // 💾 Guardar el nuevo saldo de la cuenta
           await isar.accountIsarModels.put(existingAcc);
         }
       }
 
+      // 3. ACTUALIZAR CUENTA DESTINO (Solo Transferencias)
       if (transaction.toAccount.value != null &&
           transaction.type == TransactionType.transfer) {
-        final toAccRemoteId = transaction.toAccount.value!.remoteId;
-        final existingToAcc = await isar.accountIsarModels
-            .filter()
-            .remoteIdEqualTo(toAccRemoteId)
-            .findFirst();
+        final toAccVal = transaction.toAccount.value!;
+        AccountIsarModel? existingToAcc;
+
+        if (toAccVal.id != Isar.autoIncrement)
+          existingToAcc = await isar.accountIsarModels.get(toAccVal.id);
+        if (existingToAcc == null && toAccVal.remoteId != null)
+          existingToAcc = await isar.accountIsarModels
+              .filter()
+              .remoteIdEqualTo(toAccVal.remoteId)
+              .findFirst();
 
         if (existingToAcc != null) {
           transaction.toAccount.value = existingToAcc;
 
-          // Actualizamos saldo de la cuenta destino
-          existingToAcc.balance += transaction.amount; // Aquí entra el dinero
+          // 🔑 Aquí entra el dinero
+          existingToAcc.balance += transaction.amount;
+
+          // 💾 Guardar saldo destino
           await isar.accountIsarModels.put(existingToAcc);
         }
       }
 
-      // 3. Guardar transacción y forzar guardado de relaciones
+      // 4. GUARDAR TRANSACCIÓN Y LINKS
       await isar.transactionIsarModels.put(transaction);
       await transaction.category.save();
       await transaction.account.save();

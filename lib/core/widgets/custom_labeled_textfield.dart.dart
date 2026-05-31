@@ -5,11 +5,13 @@ class CustomLabeledTextField extends StatelessWidget {
   final String label;
   final String hint;
   final TextEditingController controller;
+  final TextInputType? keyboardType;
 
   const CustomLabeledTextField({
     required this.label,
     required this.hint,
     required this.controller,
+    this.keyboardType,
     super.key,
   });
 
@@ -35,6 +37,7 @@ class CustomLabeledTextField extends StatelessWidget {
           ),
           TextField(
             controller: controller,
+            keyboardType: keyboardType ?? TextInputType.text,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.quicksand(

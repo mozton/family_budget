@@ -1,3 +1,5 @@
+import 'package:family_budget/core/widgets/color_picker.dart';
+import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
@@ -21,7 +23,7 @@ class NewAccountScreen extends StatefulWidget {
 class _NewAccountScreenState extends State<NewAccountScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController balanceController = TextEditingController();
-
+  Color accountColor = Colors.grey;
   AccountType selectedType = AccountType.bank;
 
   final Color primaryPurple = const Color(0xFF9333EA);
@@ -31,6 +33,25 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
     nameController.dispose();
     balanceController.dispose();
     super.dispose();
+  }
+
+  IconData getBackgroundColor() {
+    switch (selectedType) {
+      case AccountType.bank:
+        return TablerIcons.building_bank;
+      case AccountType.cash:
+        return TablerIcons.cash;
+      case AccountType.creditCard:
+        return TablerIcons.credit_card;
+    }
+  }
+
+  void _onColorPicked(Color color) {
+    setState(() {
+      accountColor = color;
+    });
+    // Aquí puedes guardar el color, enviarlo a una API, etc.
+    print('Color recibido: $color');
   }
 
   void _saveAccount() {
@@ -43,14 +64,14 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
 
     final newAccount = AccountEntity(
       id: '', // Se genera en el mapper/Isar
-      remoteId: Uuid().v4(), // Se generará con UUID en el BLoC
+      remoteId: Uuid().v4(),
       name: nameController.text,
       type: selectedType,
       balance: double.tryParse(balanceController.text) ?? 0.0,
       isPrivate: false,
       ownerId: 'current_user_id',
-      icon: TablerIcons.clock,
-      color: Colors.red, // Reemplazar con tu lógica de usuario
+      icon: getBackgroundColor(),
+      color: accountColor,
     );
 
     context.read<AccountBloc>().add(CreateAccountEvent(newAccount));
@@ -95,52 +116,54 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
                   letterSpacing: 1.5,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   _buildTypeOption(
                     AccountType.cash,
                     'Efectivo',
                     TablerIcons.cash,
+                    accountColor,
                   ),
                   const SizedBox(width: 12),
                   _buildTypeOption(
                     AccountType.bank,
                     'Banco',
                     TablerIcons.building_bank,
+                    accountColor,
                   ),
                   const SizedBox(width: 12),
                   _buildTypeOption(
                     AccountType.creditCard,
                     'Crédito',
                     TablerIcons.credit_card,
+                    accountColor,
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: 15),
+              ColorPicker(
+                title: 'Color de la cuenta',
+                initialColor: accountColor,
+                onColorSelected: _onColorPicked,
+              ),
+              const SizedBox(height: 20),
 
-              // Nombre de la cuenta
-              _buildCustomTextField(
-                label: "Nombre de la Cuenta",
-                hint: "Ej: Tarjeta Visa, Cuenta Nómina...",
+              CustomLabeledTextField(
+                label: 'Nombre de la Cuenta',
+                hint: 'Ej: Tarjeta Visa, Cuenta Nómina...',
                 controller: nameController,
-                keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 24),
 
               // Saldo Inicial
-              _buildCustomTextField(
-                label: "Saldo / Balance Inicial",
-                hint: "0.00",
+              CustomLabeledTextField(
+                label: 'Saldo / Balance Inicial',
+                hint: '\$0.00',
                 controller: balanceController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                prefixIcon: const Icon(
-                  TablerIcons.currency_dollar,
-                  color: Colors.grey,
-                ),
+                keyboardType: TextInputType.numberWithOptions(),
               ),
+
               const SizedBox(height: 12),
               Text(
                 selectedType == AccountType.creditCard
@@ -186,7 +209,12 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
     );
   }
 
-  Widget _buildTypeOption(AccountType type, String label, IconData icon) {
+  Widget _buildTypeOption(
+    AccountType type,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
     final isSelected = selectedType == type;
     return Expanded(
       child: GestureDetector(
@@ -195,12 +223,10 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: isSelected
-                ? primaryPurple.withOpacity(0.1)
-                : Colors.grey[50],
+            color: isSelected ? color.withValues(alpha: 0.1) : Colors.grey[50],
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? primaryPurple : Colors.grey[200]!,
+              color: isSelected ? color : Colors.grey[200]!,
               width: 2,
             ),
           ),
@@ -208,7 +234,7 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? primaryPurple : Colors.grey[400],
+                color: isSelected ? color : Colors.grey[400],
                 size: 28,
               ),
               const SizedBox(height: 8),
@@ -217,65 +243,12 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
                 style: GoogleFonts.quicksand(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                  color: isSelected ? primaryPurple : Colors.grey[500],
+                  color: isSelected ? color : Colors.grey[500],
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildCustomTextField({
-    required String label,
-    required String hint,
-    required TextEditingController controller,
-    required TextInputType keyboardType,
-    Widget? prefixIcon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[500],
-              letterSpacing: 1.2,
-            ),
-          ),
-          TextField(
-            controller: controller,
-            keyboardType: keyboardType,
-            style: GoogleFonts.quicksand(
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1F2937),
-            ),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: GoogleFonts.quicksand(
-                color: Colors.grey[400],
-                fontWeight: FontWeight.w600,
-              ),
-              border: InputBorder.none,
-              isDense: true,
-              prefixIcon: prefixIcon,
-              prefixIconConstraints: const BoxConstraints(
-                minWidth: 40,
-                minHeight: 0,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
