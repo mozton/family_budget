@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
@@ -10,25 +8,27 @@ part 'account_isar_model.g.dart';
 class AccountIsarModel {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true, replace: false)
+  @Index(unique: true, replace: true)
   String? remoteId;
 
-  late String name;
-  late int iconCodePoint;
-  late int colorValue;
+  String name = '';
+  int iconCodePoint = 0;
+  int colorValue = 0xFF9E9E9E;
 
   @enumerated
-  late AccountType type;
+  AccountType type = AccountType.cash;
 
-  late double balance;
+  double balance = 0.0;
 
-  late bool isPrivate;
-
-  @Index()
-  late DateTime date;
+  bool isPrivate = false;
 
   @Index()
-  late String ownerId;
+  DateTime date = DateTime.fromMillisecondsSinceEpoch(0);
+
+  @Index()
+  String ownerId = '';
+  
+  String vaultId = '';
 
   @ignore
   Color get color => Color(colorValue);

@@ -12,6 +12,7 @@ class AccountEntity {
   final double balance;
   final bool isPrivate;
   final String ownerId;
+  final String? vaultId;
 
   const AccountEntity({
     required this.id,
@@ -23,5 +24,6 @@ class AccountEntity {
     required this.balance,
     required this.isPrivate,
     required this.ownerId,
+    this.vaultId,
   });
 }

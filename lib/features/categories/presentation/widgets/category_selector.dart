@@ -1,6 +1,7 @@
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
+import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/widgets/add_category_button.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_item.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,44 @@ class CategorySelector extends StatelessWidget {
               isSelected: isSelected,
               amount: category.currentAmount,
               onTap: () => onCategorySelected?.call(category),
-              onLongPress: () {},
+              onLongPress: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Opciones de categoría'),
+                    content: const Text('¿Qué deseas hacer con esta categoría?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // cerrar popup
+                          
+                          // Eliminar usando remoteId (o id si remoteId está vacío)
+                          final deleteId = category.remoteId.isNotEmpty ? category.remoteId : category.id;
+                          context.read<CategoryBloc>().add(DeleteCategoryEvent(deleteId));
+                        },
+                        child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // cerrar popup
+                          
+                          Navigator.pushNamed(
+                            context,
+                            '/new_category',
+                            arguments: {
+                              'type': category.type == CategoryType.expense ? 'expense' : 'income',
+                              'title': 'Editar Categoría',
+                              'action': 'Guardar Cambios',
+                              'category': category,
+                            },
+                          );
+                        },
+                        child: const Text('Editar'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             );
           },
         );

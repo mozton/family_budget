@@ -13,6 +13,7 @@ class CategoryEntity {
   final double? targetAmount;
   final bool isPrivate;
   final String ownerId;
+  final String? vaultId;
 
   const CategoryEntity({
     required this.id,
@@ -25,6 +26,7 @@ class CategoryEntity {
     this.isPrivate = false,
     this.ownerId = '',
     required this.remoteId,
+    this.vaultId,
   });
 
   double budgetPercent() {

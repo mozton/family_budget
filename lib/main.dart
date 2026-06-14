@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_budget/features/accounts/data/datasources/account_local_datasource_impl.dart';
+
+import 'package:family_budget/features/accounts/data/datasources/account_remote_datasource_impl.dart';
 import 'package:family_budget/features/accounts/data/repositories/account_repository_impl.dart';
 import 'package:family_budget/features/accounts/domain/usecases/delete_account.dart';
 import 'package:family_budget/features/accounts/domain/usecases/get_accounts.dart';
@@ -8,6 +11,7 @@ import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.d
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
 import 'package:family_budget/features/accounts/presentation/screens/new_account_screen.dart';
 import 'package:family_budget/features/categories/data/datasources/category_local_datasource_impl.dart';
+import 'package:family_budget/features/categories/data/datasources/category_remote_datasource_impl.dart';
 import 'package:family_budget/features/categories/data/repository/category_repository_imp.dart';
 import 'package:family_budget/features/categories/domain/usercases/get_category.dart';
 import 'package:family_budget/features/categories/domain/usercases/save_category.dart';
@@ -34,6 +38,8 @@ import 'package:family_budget/features/transactions/presentation/screens/edit_tr
 import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
 import 'package:family_budget/features/transactions/presentation/screens/transaction_screen.dart';
+import 'package:family_budget/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -49,6 +55,10 @@ import 'package:family_budget/features/transactions/data/datasources/transaction
 void main() async {
   // 1. Asegurar que los bindings de Flutter estén listos
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
+
+  final firestore = FirebaseFirestore.instance;
 
   // 2. INICIALIZAR ISAR (La base de datos real)
   final dir = await getApplicationDocumentsDirectory();
@@ -67,9 +77,21 @@ void main() async {
   // Aquí usamos la implementación (Impl), no la interfaz.
   final categoryLocalDataSource = CategoryLocalDataSourceImpl(isar: isar);
 
-  // 4. INYECTAR REPOSITORIO (Pasamos la instancia del DataSource)
+  // ⚠️ TODO: reemplazar este vaultId hardcodeado con el vault real del usuario
+  // cuando implementes el login (e.g. traerlo de SharedPreferences o del AuthBloc).
+  const currentVaultId = 'vault_12345';
+
+  final categoryRemoteDataSource = CategoryRemoteDatasourceImpl(
+    firestore: firestore,
+    fallbackVaultId: currentVaultId,
+    fallbackOwnerId: 'zamir_uid',
+  );
+
+  // 4. INYECTAR REPOSITORIO (Pasamos ambos DataSources + vaultId)
   final categoryRepository = CategoryRepositoryImpl(
     categoryLocalDataSource: categoryLocalDataSource,
+    categoryRemoteDatasource: categoryRemoteDataSource,
+    vaultId: currentVaultId,
   );
 
   // 5. INYECTAR CASOS DE USO (Pasamos el Repositorio)
@@ -89,8 +111,12 @@ void main() async {
 
   // Inyección de dependencias - Accounts
   final accountLocalDataSource = AccountLocalDataSourceImpl(isar: isar);
+  final accountRemoteDataSource = AccountRemoteDataSourceImpl(
+    firestore: firestore,
+  );
   final accountRepository = AccountRepositoryImpl(
     localDataSource: accountLocalDataSource,
+    remoteDataSource: accountRemoteDataSource,
   );
   final getAccountsUseCase = GetAccountsUseCase(accountRepository);
   final saveAccountUseCase = SaveAccountUseCase(accountRepository);

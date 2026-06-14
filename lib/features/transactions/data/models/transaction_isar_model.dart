@@ -9,7 +9,7 @@ part 'transaction_isar_model.g.dart';
 class TransactionIsarModel {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true, replace: false)
+  @Index(unique: true, replace: true)
   String? remoteId;
 
   final category = IsarLink<CategoryIsarModel>();
@@ -18,18 +18,20 @@ class TransactionIsarModel {
 
   final toAccount = IsarLink<AccountIsarModel>();
 
-  late double amount;
+  double amount = 0.0;
 
-  late String note;
+  String note = '';
 
-  late bool isPrivate;
+  bool isPrivate = false;
 
   @Index()
-  late DateTime date;
+  DateTime date = DateTime.fromMillisecondsSinceEpoch(0);
 
   @enumerated
-  late TransactionType type;
+  TransactionType type = TransactionType.expense;
 
   @Index()
-  late String ownerId;
+  String ownerId = '';
+  
+  String vaultId = '';
 }

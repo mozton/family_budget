@@ -11,6 +11,7 @@ class CreateCategory extends CategoryEvent {
   final double currentAmount;
   final double targetAmount;
   final String remoteId;
+  final String vaultId;
 
   CreateCategory({
     required this.name,
@@ -20,6 +21,7 @@ class CreateCategory extends CategoryEvent {
     required this.currentAmount,
     required this.targetAmount,
     required this.remoteId,
+    required this.vaultId,
   });
 }
 

@@ -9,6 +9,7 @@ class AccountItem extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   AccountItem({
     super.key,
@@ -18,6 +19,7 @@ class AccountItem extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -26,6 +28,7 @@ class AccountItem extends StatelessWidget {
       padding: const EdgeInsets.only(right: 16),
       child: GestureDetector(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Column(
           children: [
             AnimatedContainer(

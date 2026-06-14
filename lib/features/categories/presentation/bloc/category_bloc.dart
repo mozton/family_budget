@@ -27,6 +27,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       final newEstimate = event.targetAmount;
       final newCurrentAmount = event.currentAmount;
       final newRemoteId = event.remoteId;
+      final newVault = event.vaultId;
 
       final newCategory = CategoryEntity(
         name: newName,
@@ -37,6 +38,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         targetAmount: newEstimate,
         id: 'temp_user_id',
         remoteId: newRemoteId,
+        vaultId: newVault,
       );
       await usecaseSave.saveCategory(newCategory);
       add(LoadCategoriesEvent());

@@ -113,7 +113,6 @@ class AccountsOverviewWidget extends StatelessWidget {
         icon = TablerIcons.cash;
         break;
       case AccountType.bank:
-      default:
         startColor = const Color(0xFF60A5FA);
         endColor = const Color(0xFF3B82F6);
         icon = TablerIcons.building_bank;

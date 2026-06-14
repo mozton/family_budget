@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:bloc/bloc.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:family_budget/features/transactions/domiain/usecases/get_transactions.dart';
@@ -62,6 +60,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         );
       } catch (e, stackTrace) {
         debugPrint("ERROR SAVING TRANSACTION: $e");
+        // ignore: avoid_print
         print(stackTrace);
         emit(
           TransactionState(

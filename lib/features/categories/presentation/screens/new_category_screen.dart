@@ -242,7 +242,10 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
                   CustomLabeledTextField(
                     label: 'Presupuesto de la Categoria',
                     hint: 'Ej. 5,000.00',
-                    controller: titleController,
+                    controller: limitController,
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
 
                   const SizedBox(height: 20),
@@ -557,6 +560,7 @@ class _NewCategoryScreenState extends State<NewCategoryScreen> {
               type: typeSelected,
               currentAmount: 0,
               remoteId: uuid,
+              vaultId: 'vault_12345',
               targetAmount: limitController.text.isNotEmpty
                   ? double.tryParse(limitController.text) ?? 0.0
                   : 0.0,

@@ -1,3 +1,4 @@
+import 'package:family_budget/core/utils/delete_dialog.dart';
 import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/date_time_picker.dart';
 import 'package:family_budget/core/widgets/horizontal_account_selector.dart';
@@ -85,6 +86,40 @@ class _ExpenseViewState extends State<ExpenseView> {
                   onAccountSelected: (account) {
                     setState(() => selectedAccount = account);
                   },
+                  onLongPress: () {
+                    (account) {
+                      setState(() => selectedAccount = account);
+                    };
+                    void _mostrarOpciones(BuildContext context) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return DeleteAccountOrCategoryDialog(
+                            title: '¿Qué deseas hacer?',
+                            detail:
+                                'Estás a punto de modificar esta cuenta. Elige si quieres editar sus detalles o eliminarla por completo.',
+                            onEdit: () {
+                              Navigator.pop(context); // Cierra el diálogo
+                              print('Navegando a la pantalla de edición...');
+                              // Aquí lanzas tu evento del bloc o navegas:
+                              // Navigator.pushNamed(context, '/edit_account');
+                            },
+
+                            onDelete: () {
+                              Navigator.pop(context); // Cierra el diálogo
+                              print('Disparando evento de eliminar...');
+                              // Aquí llamas a tu Bloc:
+                              context.read<AccountBloc>().add(
+                                DeleteAccountEvent(selectedAccount!.id),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }
+
+                    _mostrarOpciones(context);
+                  },
                 ),
                 const SizedBox(height: 20),
 
@@ -130,10 +165,7 @@ class _ExpenseViewState extends State<ExpenseView> {
                       _showError('Por favor selecciona una categoría');
                       return;
                     }
-                    if (amountController.text.isEmpty) {
-                      _showError('Por favor ingresa un monto');
-                      return;
-                    }
+
                     if (selectedAccount == null) {
                       _showError('Por favor selecciona la cuenta');
                       return;

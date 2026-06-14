@@ -87,6 +87,7 @@ class _IncomeViewState extends State<IncomeView> {
               onAccountSelected: (account) {
                 setState(() => selectedAccount = account);
               },
+              onLongPress: () {},
             ),
             const SizedBox(height: 25),
 
@@ -140,12 +141,6 @@ class _IncomeViewState extends State<IncomeView> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 }

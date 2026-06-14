@@ -15,6 +15,7 @@ class TransactionScreen extends StatefulWidget {
 class _TransactionScreenState extends State<TransactionScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  // ignore: unused_field
   int _currentIndex = 1;
 
   @override

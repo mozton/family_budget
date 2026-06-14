@@ -67,6 +67,11 @@ const CategoryIsarModelSchema = CollectionSchema(
       name: r'type',
       type: IsarType.byte,
       enumMap: _CategoryIsarModeltypeEnumValueMap,
+    ),
+    r'vaultId': PropertySchema(
+      id: 10,
+      name: r'vaultId',
+      type: IsarType.string,
     )
   },
   estimateSize: _categoryIsarModelEstimateSize,
@@ -79,7 +84,7 @@ const CategoryIsarModelSchema = CollectionSchema(
       id: 6301175856541681032,
       name: r'remoteId',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'remoteId',
@@ -137,6 +142,7 @@ int _categoryIsarModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.vaultId.length * 3;
   return bytesCount;
 }
 
@@ -156,6 +162,7 @@ void _categoryIsarModelSerialize(
   writer.writeString(offsets[7], object.remoteId);
   writer.writeDouble(offsets[8], object.targetAmount);
   writer.writeByte(offsets[9], object.type.index);
+  writer.writeString(offsets[10], object.vaultId);
 }
 
 CategoryIsarModel _categoryIsarModelDeserialize(
@@ -178,6 +185,7 @@ CategoryIsarModel _categoryIsarModelDeserialize(
   object.type =
       _CategoryIsarModeltypeValueEnumMap[reader.readByteOrNull(offsets[9])] ??
           CategoryType.income;
+  object.vaultId = reader.readString(offsets[10]);
   return object;
 }
 
@@ -210,6 +218,8 @@ P _categoryIsarModelDeserializeProp<P>(
       return (_CategoryIsarModeltypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           CategoryType.income) as P;
+    case 10:
+      return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1436,6 +1446,142 @@ extension CategoryIsarModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'vaultId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'vaultId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vaultId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterFilterCondition>
+      vaultIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'vaultId',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension CategoryIsarModelQueryObject
@@ -1583,6 +1729,20 @@ extension CategoryIsarModelQuerySortBy
       sortByTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterSortBy>
+      sortByVaultId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vaultId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterSortBy>
+      sortByVaultIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vaultId', Sort.desc);
     });
   }
 }
@@ -1741,6 +1901,20 @@ extension CategoryIsarModelQuerySortThenBy
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterSortBy>
+      thenByVaultId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vaultId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QAfterSortBy>
+      thenByVaultIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vaultId', Sort.desc);
+    });
+  }
 }
 
 extension CategoryIsarModelQueryWhereDistinct
@@ -1812,6 +1986,13 @@ extension CategoryIsarModelQueryWhereDistinct
       distinctByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'type');
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, CategoryIsarModel, QDistinct>
+      distinctByVaultId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'vaultId', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1886,6 +2067,12 @@ extension CategoryIsarModelQueryProperty
       typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');
+    });
+  }
+
+  QueryBuilder<CategoryIsarModel, String, QQueryOperations> vaultIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'vaultId');
     });
   }
 }

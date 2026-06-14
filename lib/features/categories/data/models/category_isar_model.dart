@@ -8,26 +8,30 @@ part 'category_isar_model.g.dart';
 class CategoryIsarModel {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true, replace: false)
+  @Index(unique: true, replace: true)
   String? remoteId;
 
-  late String name;
-  late int iconCodePoint;
-  late int colorValue;
+  String name = '';
+  int iconCodePoint = 0;
+  int colorValue = 0xFF9E9E9E; // gris neutro por defecto
 
   @enumerated
-  late CategoryType type;
+  CategoryType type = CategoryType.expense;
 
-  late double currentAmount;
-  late double targetAmount;
-
-  @Index()
-  late DateTime date;
-
-  late bool isPrivate;
+  double currentAmount = 0.0;
+  double targetAmount = 0.0;
 
   @Index()
-  late String ownerId;
+  DateTime date = DateTime.fromMillisecondsSinceEpoch(0);
+
+  bool isPrivate = false;
+
+  @Index()
+  String ownerId = '';
+
+  /// El vault al que pertenece esta categoría (grupo familiar).
+  /// Valor por defecto vacío para compatibilidad con registros antiguos.
+  String vaultId = '';
 
   @ignore
   Color get color => Color(colorValue);

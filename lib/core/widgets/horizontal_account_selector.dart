@@ -10,11 +10,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class HorizontalAccountSelector extends StatelessWidget {
   final String? selectedAccountId; // null si ninguna seleccionada
   final ValueChanged<AccountEntity> onAccountSelected;
-
+  final VoidCallback onLongPress;
   const HorizontalAccountSelector({
     super.key,
     required this.selectedAccountId,
     required this.onAccountSelected,
+    required this.onLongPress,
   });
 
   @override
@@ -55,6 +56,7 @@ class HorizontalAccountSelector extends StatelessWidget {
                 icon: account.icon,
                 color: account.color,
                 onTap: () => onAccountSelected(account),
+                onLongPress: onLongPress,
               );
             },
           ),

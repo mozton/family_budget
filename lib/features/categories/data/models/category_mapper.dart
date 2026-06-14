@@ -21,6 +21,7 @@ extension CategoryIsarMapper on CategoryIsarModel {
       currentAmount: currentAmount,
       isPrivate: isPrivate,
       ownerId: ownerId,
+      vaultId: vaultId,
       type: type == entity.CategoryType.expense
           ? entity.CategoryType.expense
           : entity.CategoryType.income,
@@ -43,6 +44,7 @@ extension CategoryEntityMapper on entity.CategoryEntity {
       ..currentAmount = currentAmount
       ..isPrivate = isPrivate
       ..ownerId = ownerId
+      ..vaultId = vaultId ?? ''
       ..date = DateTime.now()
       ..type = type == entity.CategoryType.expense
           ? entity.CategoryType.expense

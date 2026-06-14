@@ -53,6 +53,11 @@ const TransactionIsarModelSchema = CollectionSchema(
       name: r'type',
       type: IsarType.byte,
       enumMap: _TransactionIsarModeltypeEnumValueMap,
+    ),
+    r'vaultId': PropertySchema(
+      id: 7,
+      name: r'vaultId',
+      type: IsarType.string,
     )
   },
   estimateSize: _transactionIsarModelEstimateSize,
@@ -65,7 +70,7 @@ const TransactionIsarModelSchema = CollectionSchema(
       id: 6301175856541681032,
       name: r'remoteId',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'remoteId',
@@ -142,6 +147,7 @@ int _transactionIsarModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.vaultId.length * 3;
   return bytesCount;
 }
 
@@ -158,6 +164,7 @@ void _transactionIsarModelSerialize(
   writer.writeString(offsets[4], object.ownerId);
   writer.writeString(offsets[5], object.remoteId);
   writer.writeByte(offsets[6], object.type.index);
+  writer.writeString(offsets[7], object.vaultId);
 }
 
 TransactionIsarModel _transactionIsarModelDeserialize(
@@ -177,6 +184,7 @@ TransactionIsarModel _transactionIsarModelDeserialize(
   object.type = _TransactionIsarModeltypeValueEnumMap[
           reader.readByteOrNull(offsets[6])] ??
       TransactionType.income;
+  object.vaultId = reader.readString(offsets[7]);
   return object;
 }
 
@@ -203,6 +211,8 @@ P _transactionIsarModelDeserializeProp<P>(
       return (_TransactionIsarModeltypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           TransactionType.income) as P;
+    case 7:
+      return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1268,6 +1278,144 @@ extension TransactionIsarModelQueryFilter on QueryBuilder<TransactionIsarModel,
       ));
     });
   }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+      QAfterFilterCondition> vaultIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+      QAfterFilterCondition> vaultIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+      QAfterFilterCondition> vaultIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+      QAfterFilterCondition> vaultIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'vaultId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+      QAfterFilterCondition> vaultIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+      QAfterFilterCondition> vaultIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+          QAfterFilterCondition>
+      vaultIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'vaultId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+          QAfterFilterCondition>
+      vaultIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'vaultId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+      QAfterFilterCondition> vaultIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vaultId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel,
+      QAfterFilterCondition> vaultIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'vaultId',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension TransactionIsarModelQueryObject on QueryBuilder<TransactionIsarModel,
@@ -1417,6 +1565,20 @@ extension TransactionIsarModelQuerySortBy
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel, QAfterSortBy>
+      sortByVaultId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vaultId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel, QAfterSortBy>
+      sortByVaultIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vaultId', Sort.desc);
+    });
+  }
 }
 
 extension TransactionIsarModelQuerySortThenBy
@@ -1532,6 +1694,20 @@ extension TransactionIsarModelQuerySortThenBy
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel, QAfterSortBy>
+      thenByVaultId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vaultId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel, QAfterSortBy>
+      thenByVaultIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vaultId', Sort.desc);
+    });
+  }
 }
 
 extension TransactionIsarModelQueryWhereDistinct
@@ -1582,6 +1758,13 @@ extension TransactionIsarModelQueryWhereDistinct
       distinctByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'type');
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, TransactionIsarModel, QDistinct>
+      distinctByVaultId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'vaultId', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1639,6 +1822,13 @@ extension TransactionIsarModelQueryProperty on QueryBuilder<
       typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');
+    });
+  }
+
+  QueryBuilder<TransactionIsarModel, String, QQueryOperations>
+      vaultIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'vaultId');
     });
   }
 }

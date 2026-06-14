@@ -1,5 +1,5 @@
 import 'package:family_budget/features/categories/data/models/category_mapper.dart';
-import 'package:family_budget/features/accounts/data/models/account_mapper.dart';
+import 'package:family_budget/features/accounts/data/models/account_isar_mapper.dart';
 
 import 'package:family_budget/features/transactions/data/models/transaction_isar_model.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';

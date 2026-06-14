@@ -12,6 +12,7 @@ class CategoryModel extends CategoryEntity {
     required super.targetAmount,
     super.isPrivate,
     super.ownerId,
+    super.vaultId,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +27,7 @@ class CategoryModel extends CategoryEntity {
       targetAmount: json['targetAmount'],
       isPrivate: json['isPrivate'],
       ownerId: json['ownerId'],
+      vaultId: json['vaultId'],
     );
   }
 
@@ -41,6 +43,7 @@ class CategoryModel extends CategoryEntity {
       'targetAmount': targetAmount,
       'isPrivate': isPrivate,
       'ownerId': ownerId,
+      'vaultId': vaultId,
     };
   }
 }

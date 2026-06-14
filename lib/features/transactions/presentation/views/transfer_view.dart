@@ -66,6 +66,7 @@ class _TransferViewState extends State<TransferView> {
                     fromAccount = account;
                   });
                 },
+                onLongPress: () {},
               ),
               const SizedBox(height: 15),
               const SelectionTitle(title: 'Transferir a '),
@@ -77,6 +78,7 @@ class _TransferViewState extends State<TransferView> {
                     toAccount = account;
                   });
                 },
+                onLongPress: () {},
               ),
               const SizedBox(height: 20),
               CustomLabeledTextField(
