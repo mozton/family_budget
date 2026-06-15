@@ -11,17 +11,23 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 
-class NewCategoryScreen extends StatefulWidget {
+class CreateAndEditCategoryScreen extends StatefulWidget {
   final String type;
   final CategoryEntity? categoryToEdit;
 
-  const NewCategoryScreen({super.key, required this.type, this.categoryToEdit});
+  const CreateAndEditCategoryScreen({
+    super.key,
+    required this.type,
+    this.categoryToEdit,
+  });
 
   @override
-  State<NewCategoryScreen> createState() => _NewCategoryScreenState();
+  State<CreateAndEditCategoryScreen> createState() =>
+      _CreateAndEditCategoryScreenState();
 }
 
-class _NewCategoryScreenState extends State<NewCategoryScreen> {
+class _CreateAndEditCategoryScreenState
+    extends State<CreateAndEditCategoryScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
   final TextEditingController limitController = TextEditingController();

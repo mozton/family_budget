@@ -1,6 +1,6 @@
 import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/date_time_picker.dart';
-import 'package:family_budget/core/widgets/horizontal_account_selector.dart';
+import 'package:family_budget/core/widgets/account_selector.dart';
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
@@ -59,7 +59,7 @@ class _TransferViewState extends State<TransferView> {
               ),
               const SelectionTitle(title: 'Transferir desde '),
               const SizedBox(height: 10),
-              HorizontalAccountSelector(
+              AccountSelector(
                 selectedAccountId: fromAccount?.id,
                 onAccountSelected: (account) {
                   setState(() {
@@ -71,7 +71,7 @@ class _TransferViewState extends State<TransferView> {
               const SizedBox(height: 15),
               const SelectionTitle(title: 'Transferir a '),
               const SizedBox(height: 10),
-              HorizontalAccountSelector(
+              AccountSelector(
                 selectedAccountId: toAccount?.id,
                 onAccountSelected: (account) {
                   setState(() {
@@ -136,6 +136,7 @@ class _TransferViewState extends State<TransferView> {
                       type: TransactionType.transfer,
                       account: fromAccount!, // entidad completa
                       toAccount: toAccount!, // entidad completa
+                      vaultId: 'vault12345',
                     ),
                   );
                   Future.delayed(const Duration(milliseconds: 150), () {

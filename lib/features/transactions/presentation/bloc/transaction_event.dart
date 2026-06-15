@@ -13,6 +13,7 @@ class AddTransactionEvent extends TransactionEvent {
   final DateTime date;
   final bool isPrivate;
   final TransactionType type;
+  final String vaultId;
 
   AddTransactionEvent({
     this.category,
@@ -23,6 +24,7 @@ class AddTransactionEvent extends TransactionEvent {
     required this.type,
     this.toAccount,
     required this.account,
+    required this.vaultId,
   });
 }
 

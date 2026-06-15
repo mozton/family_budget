@@ -7,11 +7,11 @@ import 'package:family_budget/features/categories/presentation/widgets/add_categ
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HorizontalAccountSelector extends StatelessWidget {
+class AccountSelector extends StatelessWidget {
   final String? selectedAccountId; // null si ninguna seleccionada
   final ValueChanged<AccountEntity> onAccountSelected;
   final VoidCallback onLongPress;
-  const HorizontalAccountSelector({
+  const AccountSelector({
     super.key,
     required this.selectedAccountId,
     required this.onAccountSelected,

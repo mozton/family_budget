@@ -8,7 +8,7 @@ class TransactionEntity {
   final String category;
   final TransactionType type;
   final String userId;
-  final String familyId;
+  final String vaultId;
   final bool isPrivate;
   final String? note;
   final String account;
@@ -22,7 +22,7 @@ class TransactionEntity {
     required this.category,
     required this.type,
     required this.userId,
-    required this.familyId,
+    required this.vaultId,
     this.isPrivate = false,
     this.note,
     required this.account,

@@ -31,9 +31,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       );
 
       try {
-        // Recuerda importar el paquete uuid al inicio del archivo si vas a generar el remoteId:
-        // import 'package:uuid/uuid.dart';
-
         final newTransaction = TransactionEntity(
           id: '',
           remoteId: const Uuid().v4(),
@@ -42,7 +39,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           date: event.date,
           isPrivate: event.isPrivate,
           ownerId: 'default_owner',
-
+          vaultId: event.vaultId,
           category: event.category,
           account: event.account,
           toAccount: event.toAccount,
@@ -73,7 +70,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       }
     });
 
-    // 🔑 EL EVENTO QUE FALTABA O SE ROMPIÓ
     on<UpdateTransactionEvent>((event, emit) async {
       emit(
         TransactionState(

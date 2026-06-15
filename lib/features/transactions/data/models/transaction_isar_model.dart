@@ -18,6 +18,10 @@ class TransactionIsarModel {
 
   final toAccount = IsarLink<AccountIsarModel>();
 
+  String categoryId = '';
+  String accountId = '';
+  String toAccountId = '';
+
   double amount = 0.0;
 
   String note = '';

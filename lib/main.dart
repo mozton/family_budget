@@ -3,12 +3,14 @@ import 'package:family_budget/features/accounts/data/datasources/account_local_d
 
 import 'package:family_budget/features/accounts/data/datasources/account_remote_datasource_impl.dart';
 import 'package:family_budget/features/accounts/data/repositories/account_repository_impl.dart';
+import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/domain/usecases/delete_account.dart';
 import 'package:family_budget/features/accounts/domain/usecases/get_accounts.dart';
 import 'package:family_budget/features/accounts/domain/usecases/save_account.dart';
 import 'package:family_budget/features/accounts/domain/usecases/update_account.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
+import 'package:family_budget/features/accounts/presentation/screens/edit_account_screen.dart';
 import 'package:family_budget/features/accounts/presentation/screens/new_account_screen.dart';
 import 'package:family_budget/features/categories/data/datasources/category_local_datasource_impl.dart';
 import 'package:family_budget/features/categories/data/datasources/category_remote_datasource_impl.dart';
@@ -22,13 +24,14 @@ import 'package:family_budget/features/categories/presentation/bloc/category_blo
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/transactions/data/repository/transaction_repository_impl.dart';
+import 'package:family_budget/features/transactions/data/datasources/transaction_remote_datasource_impl.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:family_budget/features/transactions/domiain/usecases/get_transactions.dart';
 import 'package:family_budget/features/transactions/domiain/usecases/save_transaction.dart'
     as trans;
 import 'package:family_budget/features/transactions/domiain/usecases/update_transaction.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
-import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
+import 'package:family_budget/features/categories/presentation/screens/create_and_edit_category_screen.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/features/categories/presentation/screens/budget_page.dart';
 import 'package:family_budget/features/dreams/dream_screen.dart';
@@ -42,6 +45,7 @@ import 'package:family_budget/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:path_provider/path_provider.dart'; // Necesario para Isar
 import 'package:isar/isar.dart';
@@ -56,7 +60,10 @@ void main() async {
   // 1. Asegurar que los bindings de Flutter estén listos
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
+  // 2. Cargar variables de entorno desde el archivo .env
+  await dotenv.load(fileName: '.env');
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   final firestore = FirebaseFirestore.instance;
 
@@ -102,8 +109,16 @@ void main() async {
 
   // (Inyección real de transacciones)
   final transactionLocalDataSource = TransactionLocalDataSourceImpl(isar: isar);
+  final transactionRemoteDataSource = TransactionRemoteDataSourceImpl(
+    firestore: firestore,
+    fallbackVaultId: currentVaultId,
+    fallbackOwnerId: 'zamir_uid',
+  );
+
   final transactionRepository = TransactionRepositoryImpl(
     localDataSource: transactionLocalDataSource,
+    remoteDataSource: transactionRemoteDataSource,
+    vaultId: currentVaultId,
   );
   final saveTransactionUseCase = trans.SaveTransaction(transactionRepository);
   final getTransactionsUseCase = GetTransactionsUsecase(transactionRepository);
@@ -180,7 +195,10 @@ class MyApp extends StatelessWidget {
             type = args['type'] as String? ?? 'expense';
             categoryToEdit = args['category'] as CategoryEntity?;
           }
-          return NewCategoryScreen(type: type, categoryToEdit: categoryToEdit);
+          return CreateAndEditCategoryScreen(
+            type: type,
+            categoryToEdit: categoryToEdit,
+          );
         },
         '/edit_transaction': (context) {
           final transaction =
@@ -195,6 +213,11 @@ class MyApp extends StatelessWidget {
         '/budget_screen': (context) => const BudgetPage(),
         '/new_account': (context) => const NewAccountScreen(),
         '/tfScreen': (context) => TransactionScreen(),
+        '/edit_account': (context) {
+          final account =
+              ModalRoute.of(context)!.settings.arguments as AccountEntity;
+          return EditAccountScreen(account: account);
+        },
       },
     );
   }

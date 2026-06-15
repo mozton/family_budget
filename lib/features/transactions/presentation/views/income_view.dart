@@ -1,6 +1,6 @@
 import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/date_time_picker.dart';
-import 'package:family_budget/core/widgets/horizontal_account_selector.dart';
+import 'package:family_budget/core/widgets/account_selector.dart';
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
@@ -82,7 +82,7 @@ class _IncomeViewState extends State<IncomeView> {
 
             const SelectionTitle(title: 'CUENTA (donde ingreso)'),
             const SizedBox(height: 10),
-            HorizontalAccountSelector(
+            AccountSelector(
               selectedAccountId: selectedAccount?.id,
               onAccountSelected: (account) {
                 setState(() => selectedAccount = account);
@@ -126,6 +126,7 @@ class _IncomeViewState extends State<IncomeView> {
                     category: selectedCategory,
                     account: selectedAccount!,
                     toAccount: null,
+                    vaultId: 'vault12345',
                   ),
                 );
                 Future.delayed(const Duration(milliseconds: 150), () {

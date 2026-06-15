@@ -44,6 +44,7 @@ class CustomLabeledTextField extends StatelessWidget {
                 color: Colors.grey[400],
                 fontWeight: FontWeight.w600,
               ),
+
               border: InputBorder.none,
               isDense: true,
             ),

@@ -6,10 +6,8 @@ import 'package:family_budget/features/transactions/domiain/entities/transaction
 import 'package:uuid/uuid.dart';
 
 extension TransactionIsarMapper on TransactionIsarModel {
-  // Convierte de ISAR a ENTITY (Para leer de la DB local hacia la UI)
   TransactionEntity toEntity() {
     return TransactionEntity(
-      // 🔑 Priorizamos el remoteId (UUID) como ID principal si existe, de lo contrario usamos el ID local de Isar
       id: (remoteId != null && remoteId!.isNotEmpty)
           ? remoteId!
           : id.toString(),
@@ -21,10 +19,22 @@ extension TransactionIsarMapper on TransactionIsarModel {
       account: account.value?.toEntity(),
       toAccount: toAccount.value?.toEntity(),
 
+      // Usamos los strings además de los objetos relacionados
+      categoryId: categoryId.isNotEmpty
+          ? categoryId
+          : category.value?.remoteId ?? '',
+      accountId: accountId.isNotEmpty
+          ? accountId
+          : account.value?.remoteId ?? '',
+      toAccountId: toAccountId.isNotEmpty
+          ? toAccountId
+          : toAccount.value?.remoteId ?? '',
+
       amount: amount,
       note: note,
       isPrivate: isPrivate,
       ownerId: ownerId,
+      vaultId: vaultId,
       date: date,
 
       // Mapeo del Enum
@@ -45,6 +55,14 @@ extension TransactionEntityMapper on TransactionEntity {
       ..isPrivate = isPrivate
       ..date = date
       ..ownerId = ownerId.isNotEmpty ? ownerId : (category?.ownerId ?? '')
+      ..vaultId = vaultId
+      ..categoryId = categoryId.isNotEmpty
+          ? categoryId
+          : (category?.remoteId ?? '')
+      ..accountId = accountId.isNotEmpty ? accountId : (account?.remoteId ?? '')
+      ..toAccountId = toAccountId.isNotEmpty
+          ? toAccountId
+          : (toAccount?.remoteId ?? '')
       ..type = transactionType;
 
     if (parsedId != null) {
