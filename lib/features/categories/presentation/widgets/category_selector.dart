@@ -72,34 +72,47 @@ class CategorySelector extends StatelessWidget {
               type: category.type!,
               color: category.color ?? const Color(0xFF9333EA),
               isSelected: isSelected,
-              amount: category.currentAmount,
+              amount: type == CategoryType.expense
+                  ? category.currentAmount
+                  : category.targetAmount ?? 0,
               onTap: () => onCategorySelected?.call(category),
               onLongPress: () {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Opciones de categoría'),
-                    content: const Text('¿Qué deseas hacer con esta categoría?'),
+                    content: const Text(
+                      '¿Qué deseas hacer con esta categoría?',
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context); // cerrar popup
-                          
+
                           // Eliminar usando remoteId (o id si remoteId está vacío)
-                          final deleteId = category.remoteId.isNotEmpty ? category.remoteId : category.id;
-                          context.read<CategoryBloc>().add(DeleteCategoryEvent(deleteId));
+                          final deleteId = category.remoteId.isNotEmpty
+                              ? category.remoteId
+                              : category.id;
+                          context.read<CategoryBloc>().add(
+                            DeleteCategoryEvent(deleteId),
+                          );
                         },
-                        child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                        child: const Text(
+                          'Eliminar',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context); // cerrar popup
-                          
+
                           Navigator.pushNamed(
                             context,
                             '/new_category',
                             arguments: {
-                              'type': category.type == CategoryType.expense ? 'expense' : 'income',
+                              'type': category.type == CategoryType.expense
+                                  ? 'expense'
+                                  : 'income',
                               'title': 'Editar Categoría',
                               'action': 'Guardar Cambios',
                               'category': category,

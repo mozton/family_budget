@@ -24,7 +24,7 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _balanceController;
-  late Color _color = Colors.grey;
+  Color? _color;
   AccountType _currentSelectedType = AccountType.bank;
 
   @override
@@ -98,7 +98,7 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
 
                   ColorPicker(
                     title: 'Color de la cuenta',
-                    initialColor: _color,
+                    initialColor: widget.account.color,
                     onColorSelected: (Color newColor) {
                       setState(() {
                         _color = newColor;
@@ -132,7 +132,7 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
                           remoteId: widget.account.remoteId,
                           name: _nameController.text,
                           icon: widget.account.icon,
-                          color: _color,
+                          color: _color ?? widget.account.color,
                           type: _currentSelectedType,
                           balance:
                               double.tryParse(_balanceController.text) ?? 0,

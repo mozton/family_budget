@@ -1,9 +1,11 @@
+import 'package:family_budget/core/utils/delete_dialog.dart';
 import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/date_time_picker.dart';
 import 'package:family_budget/core/widgets/account_selector.dart';
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
+import 'package:family_budget/features/accounts/presentation/utils/account_dialogs.dart';
 
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
@@ -87,7 +89,12 @@ class _IncomeViewState extends State<IncomeView> {
               onAccountSelected: (account) {
                 setState(() => selectedAccount = account);
               },
-              onLongPress: () {},
+              onLongPress: (account) {
+                setState(() {
+                  selectedAccount = account;
+                });
+                showAccountOptionsDialog(context, account);
+              },
             ),
             const SizedBox(height: 25),
 

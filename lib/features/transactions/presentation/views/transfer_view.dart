@@ -4,6 +4,7 @@ import 'package:family_budget/core/widgets/account_selector.dart';
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
+import 'package:family_budget/features/accounts/presentation/utils/account_dialogs.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 
@@ -66,7 +67,12 @@ class _TransferViewState extends State<TransferView> {
                     fromAccount = account;
                   });
                 },
-                onLongPress: () {},
+                onLongPress: (fromAccount) {
+                  setState(() {
+                    fromAccount = fromAccount;
+                  });
+                  showAccountOptionsDialog(context, fromAccount);
+                },
               ),
               const SizedBox(height: 15),
               const SelectionTitle(title: 'Transferir a '),
@@ -78,7 +84,13 @@ class _TransferViewState extends State<TransferView> {
                     toAccount = account;
                   });
                 },
-                onLongPress: () {},
+                onLongPress: (tAccount) {
+                  setState(() {
+                    toAccount = tAccount;
+                  });
+
+                  showAccountOptionsDialog(context, tAccount);
+                },
               ),
               const SizedBox(height: 20),
               CustomLabeledTextField(

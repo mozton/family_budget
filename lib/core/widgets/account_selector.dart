@@ -1,6 +1,5 @@
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
-
 import 'package:family_budget/features/accounts/presentation/bloc/account_state.dart';
 import 'package:family_budget/features/accounts/presentation/widgets/account_item.dart';
 import 'package:family_budget/features/categories/presentation/widgets/add_category_button.dart';
@@ -10,7 +9,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AccountSelector extends StatelessWidget {
   final String? selectedAccountId; // null si ninguna seleccionada
   final ValueChanged<AccountEntity> onAccountSelected;
-  final VoidCallback onLongPress;
+
+  // 💡 CORRECCIÓN: Definimos explícitamente que onLongPress debe recibir un AccountEntity
+  final ValueChanged<AccountEntity> onLongPress;
+
   const AccountSelector({
     super.key,
     required this.selectedAccountId,
@@ -45,9 +47,11 @@ class AccountSelector extends StatelessWidget {
               }
 
               final account = state.accounts[index];
+
+              // 💡 MEJORA: Comprobamos por ID o por nombre para evitar fallos de selección
               final isSelected =
                   selectedAccountId == account.id ||
-                  selectedAccountId == account.name;
+                  selectedAccountId == account.remoteId;
 
               return AccountItem(
                 name: account.name,
@@ -56,7 +60,9 @@ class AccountSelector extends StatelessWidget {
                 icon: account.icon,
                 color: account.color,
                 onTap: () => onAccountSelected(account),
-                onLongPress: onLongPress,
+
+                // 💡 CORRECCIÓN: Ahora llamamos de verdad a la función pasando la cuenta pulsada
+                onLongPress: () => onLongPress(account),
               );
             },
           ),

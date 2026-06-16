@@ -3,14 +3,17 @@ import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/date_time_picker.dart';
 import 'package:family_budget/core/widgets/account_selector.dart';
 import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
+
 import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
+import 'package:family_budget/features/accounts/presentation/utils/account_dialogs.dart';
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_selector.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
+
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/generic_button.dart';
@@ -86,41 +89,12 @@ class _ExpenseViewState extends State<ExpenseView> {
                   onAccountSelected: (account) {
                     setState(() => selectedAccount = account);
                   },
-                  onLongPress: () {
-                    (account) {
-                      setState(() => selectedAccount = account);
-                    };
-                    void _mostrarOpciones(BuildContext context) {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return DeleteAccountOrCategoryDialog(
-                            title: '¿Qué deseas hacer?',
-                            detail:
-                                'Estás a punto de modificar esta cuenta. Elige si quieres editar sus detalles o eliminarla por completo.',
-                            onEdit: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/edit_account',
-                                arguments:
-                                    selectedAccount, // Pasas el objeto AccountEntity que deseas modificar
-                              );
-                            },
 
-                            onDelete: () {
-                              Navigator.pop(context); // Cierra el diálogo
-                              print('Disparando evento de eliminar...');
-                              // Aquí llamas a tu Bloc:
-                              context.read<AccountBloc>().add(
-                                DeleteAccountEvent(selectedAccount!.id),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    }
-
-                    _mostrarOpciones(context);
+                  onLongPress: (account) {
+                    setState(() {
+                      selectedAccount = account;
+                    });
+                    showAccountOptionsDialog(context, account);
                   },
                 ),
                 const SizedBox(height: 20),
