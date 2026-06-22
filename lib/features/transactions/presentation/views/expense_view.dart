@@ -1,4 +1,3 @@
-import 'package:family_budget/core/utils/delete_dialog.dart';
 import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/date_time_picker.dart';
 import 'package:family_budget/core/widgets/account_selector.dart';
@@ -11,6 +10,7 @@ import 'package:family_budget/features/categories/domain/entities/category_entit
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
+import 'package:family_budget/features/categories/presentation/utils/categories_dialogs.dart';
 import 'package:family_budget/features/categories/presentation/widgets/category_selector.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 
@@ -107,6 +107,12 @@ class _ExpenseViewState extends State<ExpenseView> {
                   selectedCategoryId: selectedCategory?.id,
                   onCategorySelected: (category) {
                     setState(() => selectedCategory = category);
+                  },
+                  onLongPress: (CategoryEntity category) {
+                    setState(() {
+                      selectedCategory = category;
+                    });
+                    showCategoryOptionsDialog(context, category);
                   },
                 ),
                 const SizedBox(height: 15),

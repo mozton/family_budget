@@ -43,7 +43,9 @@ class CategoryRepositoryImpl implements CategoryRepository {
       );
     } catch (e) {
       // Si Firestore no está disponible (offline), usamos el caché local sin problema
-      debugPrint('⚠️ No se pudo sincronizar desde Firestore, usando caché local: $e');
+      debugPrint(
+        '⚠️ No se pudo sincronizar desde Firestore, usando caché local: $e',
+      );
     }
 
     // 2. Leer siempre desde Isar (fuente de verdad local)

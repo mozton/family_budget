@@ -104,7 +104,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   ) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      await deleteAccountUseCase.call(event.accountId);
+      await deleteAccountUseCase.call(event.accountRemoteId);
       add(LoadAccountsEvent());
     } catch (e) {
       emit(

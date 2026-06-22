@@ -47,8 +47,6 @@ class AccountSelector extends StatelessWidget {
               }
 
               final account = state.accounts[index];
-
-              // 💡 MEJORA: Comprobamos por ID o por nombre para evitar fallos de selección
               final isSelected =
                   selectedAccountId == account.id ||
                   selectedAccountId == account.remoteId;
@@ -60,8 +58,6 @@ class AccountSelector extends StatelessWidget {
                 icon: account.icon,
                 color: account.color,
                 onTap: () => onAccountSelected(account),
-
-                // 💡 CORRECCIÓN: Ahora llamamos de verdad a la función pasando la cuenta pulsada
                 onLongPress: () => onLongPress(account),
               );
             },

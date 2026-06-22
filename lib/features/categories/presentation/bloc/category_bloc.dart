@@ -45,7 +45,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     });
 
     on<DeleteCategoryEvent>((event, emit) async {
-      await usecaseDelete(event.name);
+      await usecaseDelete(event.categoryRemotreId);
       add(LoadCategoriesEvent());
     });
 

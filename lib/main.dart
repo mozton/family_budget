@@ -12,6 +12,7 @@ import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.d
 import 'package:family_budget/features/accounts/presentation/bloc/account_event.dart';
 import 'package:family_budget/features/accounts/presentation/screens/edit_account_screen.dart';
 import 'package:family_budget/features/accounts/presentation/screens/new_account_screen.dart';
+
 import 'package:family_budget/features/categories/data/datasources/category_local_datasource_impl.dart';
 import 'package:family_budget/features/categories/data/datasources/category_remote_datasource_impl.dart';
 import 'package:family_budget/features/categories/data/repository/category_repository_imp.dart';
@@ -31,7 +32,8 @@ import 'package:family_budget/features/transactions/domiain/usecases/save_transa
     as trans;
 import 'package:family_budget/features/transactions/domiain/usecases/update_transaction.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
-import 'package:family_budget/features/categories/presentation/screens/create_and_edit_category_screen.dart';
+import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
+import 'package:family_budget/features/categories/presentation/screens/edit_category_screen.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/features/categories/presentation/screens/budget_page.dart';
 import 'package:family_budget/features/dreams/dream_screen.dart';
@@ -188,17 +190,17 @@ class MyApp extends StatelessWidget {
         '/new_category': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           String type = 'expense';
-          CategoryEntity? categoryToEdit;
           if (args is String) {
             type = args;
           } else if (args is Map<String, dynamic>) {
             type = args['type'] as String? ?? 'expense';
-            categoryToEdit = args['category'] as CategoryEntity?;
           }
-          return CreateAndEditCategoryScreen(
-            type: type,
-            categoryToEdit: categoryToEdit,
-          );
+          return NewCategoryScreen(type: type);
+        },
+        '/edit_category': (context) {
+          final category =
+              ModalRoute.of(context)!.settings.arguments as CategoryEntity;
+          return EditCategoryScreen(category: category);
         },
         '/edit_transaction': (context) {
           final transaction =

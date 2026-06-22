@@ -1,9 +1,11 @@
+import 'package:family_budget/core/widgets/color_picker.dart';
 import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/custom_type_selector.dart';
-import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
+import 'package:family_budget/features/transactions/presentation/widgets/generic_button.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
+import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
@@ -11,23 +13,15 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 
-class CreateAndEditCategoryScreen extends StatefulWidget {
+class NewCategoryScreen extends StatefulWidget {
   final String type;
-  final CategoryEntity? categoryToEdit;
-
-  const CreateAndEditCategoryScreen({
-    super.key,
-    required this.type,
-    this.categoryToEdit,
-  });
+  const NewCategoryScreen({super.key, required this.type});
 
   @override
-  State<CreateAndEditCategoryScreen> createState() =>
-      _CreateAndEditCategoryScreenState();
+  State<NewCategoryScreen> createState() => _NewCategoryScreenState();
 }
 
-class _CreateAndEditCategoryScreenState
-    extends State<CreateAndEditCategoryScreen> {
+class _NewCategoryScreenState extends State<NewCategoryScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
   final TextEditingController limitController = TextEditingController();
@@ -188,21 +182,9 @@ class _CreateAndEditCategoryScreenState
   @override
   void initState() {
     super.initState();
-    if (widget.categoryToEdit != null) {
-      final category = widget.categoryToEdit!;
-      titleController.text = category.name;
-      limitController.text =
-          category.targetAmount != null && category.targetAmount != 0
-          ? category.targetAmount!.toStringAsFixed(0)
-          : '';
-      colorSelected = category.color ?? colors.first;
-      typeSelected = category.type?.name ?? widget.type;
-      selectedIcon = category.icon;
-    } else {
-      colorSelected = colors.first;
-      typeSelected = widget.type;
-      selectedIcon = availableIcons.first;
-    }
+    colorSelected = colors.first;
+    typeSelected = widget.type;
+    selectedIcon = availableIcons.first;
   }
 
   @override
@@ -220,10 +202,10 @@ class _CreateAndEditCategoryScreenState
                 icon: const Icon(Icons.arrow_back, color: Colors.grey),
                 onPressed: () => Navigator.pop(context),
               ),
+
+              // ____Title______________________________________
               title: Text(
-                widget.categoryToEdit != null
-                    ? 'Editar Categoría'
-                    : 'Nueva Categoría',
+                'Nueva Categoría',
                 style: GoogleFonts.quicksand(
                   color: const Color(0xFF1F2937),
                   fontWeight: FontWeight.bold,
@@ -237,7 +219,17 @@ class _CreateAndEditCategoryScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  _buildTypeSelector(),
+                  // _buildTypeSelector(),
+                  CustomTypeSelector(
+                    isLeftSelected: typeSelected == 'expense',
+                    leftLabel: 'Gasto',
+                    rightLabel: 'Ingreso',
+                    onChanged: (type) {
+                      setState(() {
+                        typeSelected = type ? 'expense' : 'income';
+                      });
+                    },
+                  ),
                   const SizedBox(height: 20),
                   CustomLabeledTextField(
                     label: 'Nombre de la Categoria',
@@ -256,11 +248,46 @@ class _CreateAndEditCategoryScreenState
 
                   const SizedBox(height: 20),
                   _buildIconSelector(context),
-                  const SizedBox(height: 30),
-                  _buildColorPicker(),
+
                   const SizedBox(height: 30),
 
-                  _buildSubmitButton(),
+                  ColorPicker(
+                    title: 'COLOR DE LA CATEGORIA',
+                    initialColor: colorSelected,
+                    onColorSelected: (color) {
+                      setState(() {
+                        colorSelected = color;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 30),
+
+                  // _buildSubmitButton(),
+                  AnimatedGenericButton(
+                    label: ' Guardar Categoria',
+                    onPressed: () {
+                      final uuid = const Uuid().v4();
+                      final newCategory = CreateCategory(
+                        name: titleController.text,
+                        icon: selectedIcon,
+                        color: colorSelected,
+                        type: typeSelected,
+                        currentAmount: 0,
+                        remoteId: uuid,
+                        vaultId: 'vault_12345',
+                        targetAmount: limitController.text.isNotEmpty
+                            ? double.tryParse(limitController.text) ?? 0.0
+                            : 0.0,
+                      );
+                      context.read<CategoryBloc>().add(newCategory);
+
+                      Navigator.pop(context);
+                    },
+                    colors: [Colors.purple, Colors.purpleAccent],
+                    type: TransactionType.values.firstWhere(
+                      (e) => e.name == typeSelected,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -396,202 +423,6 @@ class _CreateAndEditCategoryScreenState
           ),
         );
       },
-    );
-  }
-
-  Widget _buildColorPicker() {
-    return Container(
-      padding: const EdgeInsets.only(top: 16, bottom: 16, left: 16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "COLOR DE LA CATEGORÍA",
-            style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[500],
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 100,
-            width: double.infinity,
-            child: ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Colors.transparent,
-                    Colors.grey,
-                    Colors.white,
-                    Colors.transparent,
-                  ],
-                  stops: [0.0, 0.03, 0.95, 1.0],
-                ).createShader(bounds);
-              },
-              blendMode: BlendMode.dstIn,
-              child: GridView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: colors.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                ),
-                itemBuilder: (context, index) {
-                  final color = colors[index];
-                  final isSelected = colorSelected == color;
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => colorSelected = color);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 25,
-                      height: 25,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(color: Colors.grey[300]!, width: 3)
-                            : null,
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: color.withValues(alpha: .4),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : [],
-                      ),
-                      child: isSelected
-                          ? const Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 24,
-                            )
-                          : null,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTypeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "TIPO DE CATEGORÍA",
-          style: GoogleFonts.quicksand(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[500],
-          ),
-        ),
-        const SizedBox(height: 16),
-        CustomTypeSelector(
-          isLeftSelected: typeSelected == 'expense',
-          leftLabel: "Gasto",
-          rightLabel: "Ingreso",
-          onChanged: (isLeft) {
-            setState(() {
-              typeSelected = isLeft ? 'expense' : 'income';
-            });
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    final isEditing = widget.categoryToEdit != null;
-    return Container(
-      width: double.infinity,
-      height: 60,
-      decoration: BoxDecoration(
-        color: primaryPurple,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: primaryPurple.withValues(alpha: .3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: () {
-          if (isEditing) {
-            final category = widget.categoryToEdit!;
-            final updatedCategory = CategoryEntity(
-              id: category.id,
-              name: titleController.text,
-              icon: selectedIcon,
-              color: colorSelected,
-              type: CategoryType.values.firstWhere(
-                (e) => e.name == typeSelected,
-              ),
-              currentAmount: category.currentAmount,
-              targetAmount: limitController.text.isNotEmpty
-                  ? double.tryParse(limitController.text) ?? 0.0
-                  : 0.0,
-              isPrivate: category.isPrivate,
-              ownerId: category.ownerId,
-              remoteId: category.remoteId,
-            );
-            context.read<CategoryBloc>().add(
-              UpdateCategoryEvent(updatedCategory),
-            );
-          } else {
-            final uuid = const Uuid().v4();
-            final newCategory = CreateCategory(
-              name: titleController.text,
-              icon: selectedIcon,
-              color: colorSelected,
-              type: typeSelected,
-              currentAmount: 0,
-              remoteId: uuid,
-              vaultId: 'vault_12345',
-              targetAmount: limitController.text.isNotEmpty
-                  ? double.tryParse(limitController.text) ?? 0.0
-                  : 0.0,
-            );
-            context.read<CategoryBloc>().add(newCategory);
-          }
-
-          Navigator.pop(context);
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-        child: Text(
-          isEditing ? "Guardar Cambios" : "Guardar Categoría",
-          style: GoogleFonts.quicksand(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
     );
   }
 }

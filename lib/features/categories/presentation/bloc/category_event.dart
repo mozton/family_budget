@@ -26,8 +26,8 @@ class CreateCategory extends CategoryEvent {
 }
 
 class DeleteCategoryEvent extends CategoryEvent {
-  final String name;
-  DeleteCategoryEvent(this.name);
+  final String categoryRemotreId;
+  DeleteCategoryEvent(this.categoryRemotreId);
 }
 
 class LoadCategoriesEvent extends CategoryEvent {}

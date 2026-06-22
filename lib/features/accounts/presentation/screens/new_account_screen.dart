@@ -9,10 +9,6 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 
-// NOTA: Asegúrate de tener tu AccountBloc creado para manejar el guardado
-// import 'package:family_budget/features/accounts/presentation/bloc/account_bloc.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-
 class NewAccountScreen extends StatefulWidget {
   const NewAccountScreen({super.key});
 
@@ -50,7 +46,6 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
     setState(() {
       accountColor = color;
     });
-    // Aquí puedes guardar el color, enviarlo a una API, etc.
     print('Color recibido: $color');
   }
 
@@ -72,6 +67,7 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
       ownerId: 'current_user_id',
       icon: getBackgroundColor(),
       color: accountColor,
+      vaultId: 'vault_12345',
     );
 
     context.read<AccountBloc>().add(CreateAccountEvent(newAccount));

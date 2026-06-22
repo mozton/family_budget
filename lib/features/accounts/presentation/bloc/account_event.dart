@@ -15,8 +15,8 @@ class UpdateAccountEvent extends AccountEvent {
 }
 
 class DeleteAccountEvent extends AccountEvent {
-  final String accountId; // Debe ser el remoteId
-  DeleteAccountEvent(this.accountId);
+  final String accountRemoteId;
+  DeleteAccountEvent(this.accountRemoteId);
 }
 
 class SelectAccountEvent extends AccountEvent {

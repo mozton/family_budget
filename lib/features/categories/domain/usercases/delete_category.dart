@@ -5,7 +5,7 @@ class DeleteCategory {
 
   DeleteCategory(this.repository);
 
-  Future<void> call(String name) {
-    return repository.deleteCategory(name);
+  Future<void> call(String categoryRemoteId) {
+    return repository.deleteCategory(categoryRemoteId);
   }
 }
