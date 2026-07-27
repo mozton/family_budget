@@ -7,13 +7,12 @@ import 'package:family_budget/features/accounts/presentation/bloc/account_event.
 import 'package:family_budget/features/accounts/presentation/utils/account_dialogs.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
-
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/generic_button.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/private_toggle.dart';
-import 'package:family_budget/features/transactions/presentation/widgets/selection_title.dart';
+import 'package:family_budget/core/widgets/selection_title.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/textfield_amount_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -140,18 +139,19 @@ class _TransferViewState extends State<TransferView> {
 
                   // Disparar evento de transferencia
                   context.read<TransactionBloc>().add(
-                    AddTransactionEvent(
+                    AddTransferEvent(
                       amount: amount,
                       note: noteController.text,
                       date: dateTime,
                       isPrivate: isPrivate,
-                      type: TransactionType.transfer,
-                      account: fromAccount!, // entidad completa
-                      toAccount: toAccount!, // entidad completa
-                      vaultId: 'vault12345',
+                      icon: toAccount!.icon,
+                      color: toAccount!.color,
+                      fromAccount: fromAccount!,
+                      toAccount: toAccount!,
+                      vaultId: 'vault_12345',
                     ),
                   );
-                  Future.delayed(const Duration(milliseconds: 150), () {
+                  Future.delayed(const Duration(milliseconds: 200), () {
                     if (context.mounted) {
                       context.read<AccountBloc>().add(LoadAccountsEvent());
                       context.read<CategoryBloc>().add(LoadCategoriesEvent());
@@ -159,6 +159,7 @@ class _TransferViewState extends State<TransferView> {
                   });
 
                   _resetData(context);
+                  Navigator.pop(context);
                 },
                 colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
               ),

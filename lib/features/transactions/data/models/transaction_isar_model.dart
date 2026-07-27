@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:family_budget/features/categories/data/models/category_isar_model.dart';
 import 'package:family_budget/features/accounts/data/models/account_isar_model.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
 part 'transaction_isar_model.g.dart';
@@ -11,7 +14,8 @@ class TransactionIsarModel {
 
   @Index(unique: true, replace: true)
   String? remoteId;
-
+  int iconCodePoint = 0;
+  int colorValue = 0xFF9E9E9E;
   final category = IsarLink<CategoryIsarModel>();
 
   final account = IsarLink<AccountIsarModel>();
@@ -36,6 +40,16 @@ class TransactionIsarModel {
 
   @Index()
   String ownerId = '';
-  
+
   String vaultId = '';
+
+  @ignore
+  Color get color => Color(colorValue);
+
+  @ignore
+  IconData get icon => IconData(
+    iconCodePoint,
+    fontFamily: "tabler-icons",
+    fontPackage: "flutter_tabler_icons",
+  );
 }

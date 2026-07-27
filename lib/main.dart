@@ -31,6 +31,8 @@ import 'package:family_budget/features/transactions/domiain/usecases/get_transac
 import 'package:family_budget/features/transactions/domiain/usecases/save_transaction.dart'
     as trans;
 import 'package:family_budget/features/transactions/domiain/usecases/update_transaction.dart';
+import 'package:family_budget/features/transactions/domiain/usecases/delete_transaction.dart'
+    as trans_del;
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/categories/presentation/screens/new_category_screen.dart';
 import 'package:family_budget/features/categories/presentation/screens/edit_category_screen.dart';
@@ -42,6 +44,7 @@ import 'package:family_budget/features/main_navigation/presentation/pages/main_n
 import 'package:family_budget/features/transactions/presentation/screens/edit_transaction_screen.dart';
 import 'package:family_budget/features/transactions/presentation/screens/new_entry_screen.dart';
 import 'package:family_budget/features/profile/presentation/pages/profile_screen.dart';
+import 'package:family_budget/features/transactions/presentation/screens/over_view_screen.dart';
 import 'package:family_budget/features/transactions/presentation/screens/transaction_screen.dart';
 import 'package:family_budget/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -125,6 +128,9 @@ void main() async {
   final saveTransactionUseCase = trans.SaveTransaction(transactionRepository);
   final getTransactionsUseCase = GetTransactionsUsecase(transactionRepository);
   final updateTransactionUseCase = UpdateTransaction(transactionRepository);
+  final deleteTransactionUseCase = trans_del.DeleteTransactionUseCase(
+    transactionRepository,
+  );
 
   // Inyección de dependencias - Accounts
   final accountLocalDataSource = AccountLocalDataSourceImpl(isar: isar);
@@ -167,6 +173,9 @@ void main() async {
             saveTransactionUseCase,
             getTransactionsUseCase,
             updateTransactionUseCase,
+            deleteTransactionUseCase,
+            updateAccountUseCase,
+            updateCategoryUseCase,
           )..add(GetTransactionsEvent()),
         ),
       ],
@@ -186,7 +195,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const MainNavigation(),
-        '/new_entry': (context) => NewEntryScreen(),
+        // '/new_entry': (context) => NewEntryScreen(),
         '/new_category': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           String type = 'expense';
@@ -220,6 +229,7 @@ class MyApp extends StatelessWidget {
               ModalRoute.of(context)!.settings.arguments as AccountEntity;
           return EditAccountScreen(account: account);
         },
+        '/overview': (context) => OverViewScreen(),
       },
     );
   }

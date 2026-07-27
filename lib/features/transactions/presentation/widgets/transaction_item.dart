@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 
 class TransactionItem extends StatelessWidget {
   final IconData? icon;
+  // final IconData? iconTo;
   final Color iconColor;
   final String title;
   final String date;
@@ -15,6 +16,7 @@ class TransactionItem extends StatelessWidget {
   const TransactionItem({
     super.key,
     this.icon,
+    // this.iconTo,
     required this.iconColor,
     required this.title,
     required this.date,
@@ -43,37 +45,15 @@ class TransactionItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            height: 48,
-            width: 48,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: .15),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(icon ?? TablerIcons.category, size: 24, color: iconColor),
-                if (isPrivate)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.lock,
-                        size: 10,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+          _buildCategoryAndAccount(icon ?? Icons.abc, iconColor),
+
+          // SizedBox(width: 5),
+
+          // Icon(TablerIcons.arrow_narrow_right_dashed, color: Colors.grey),
+
+          // SizedBox(width: 5),
+
+          // _buildCategoryAndAccount(iconTo ?? Icons.abc, iconColor),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -81,6 +61,7 @@ class TransactionItem extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.quicksand(
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF1F2937),
@@ -104,6 +85,36 @@ class TransactionItem extends StatelessWidget {
               color: amountColor,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Container _buildCategoryAndAccount(IconData icon, Color iconColor) {
+    return Container(
+      height: 48,
+      width: 48,
+      decoration: BoxDecoration(
+        color: iconColor.withValues(alpha: .15),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(icon, size: 24, color: iconColor),
+          if (isPrivate)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.lock, size: 10, color: Colors.grey),
+              ),
+            ),
         ],
       ),
     );

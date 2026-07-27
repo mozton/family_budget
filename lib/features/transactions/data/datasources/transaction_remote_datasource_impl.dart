@@ -65,7 +65,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           .get();
 
       return querySnapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         return TransactionFirebaseMapper.fromFirebaseMap(data, doc.id);
       }).toList();
     } catch (e) {

@@ -1,4 +1,3 @@
-import 'package:family_budget/core/utils/delete_dialog.dart';
 import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/date_time_picker.dart';
 import 'package:family_budget/core/widgets/account_selector.dart';
@@ -10,6 +9,7 @@ import 'package:family_budget/features/accounts/presentation/utils/account_dialo
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:family_budget/features/categories/presentation/bloc/category_event.dart';
+import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
 import 'package:family_budget/features/categories/presentation/utils/categories_dialogs.dart';
 
 import 'package:family_budget/features/categories/presentation/widgets/category_selector.dart';
@@ -18,7 +18,7 @@ import 'package:family_budget/features/transactions/presentation/bloc/transactio
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/generic_button.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/private_toggle.dart';
-import 'package:family_budget/features/transactions/presentation/widgets/selection_title.dart';
+import 'package:family_budget/core/widgets/selection_title.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/textfield_amount_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,102 +60,111 @@ class _IncomeViewState extends State<IncomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Column(
-          children: [
-            TextfieldAmountInput(
-              color: const Color(0xFF10B981),
-              controller: amountController,
-            ),
-            const SizedBox(height: 15),
+    return BlocBuilder<CategoryBloc, CategoryState>(
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: Column(
+              children: [
+                TextfieldAmountInput(
+                  color: const Color(0xFF10B981),
+                  controller: amountController,
+                ),
+                const SizedBox(height: 15),
 
-            const SelectionTitle(title: 'CATEGORÍA'),
-            const SizedBox(height: 10),
-            CategorySelector(
-              type: CategoryType.income,
-              selectedCategoryId: selectedCategory?.id,
-              onCategorySelected: (category) {
-                setState(() => selectedCategory = category);
-              },
-              onLongPress: (CategoryEntity category) {
-                setState(() {
-                  selectedCategory = category;
-                });
-                showCategoryOptionsDialog(context, category);
-              },
-            ),
-            const SizedBox(height: 20),
+                const SelectionTitle(title: 'CATEGORÍA'),
+                const SizedBox(height: 10),
 
-            const SelectionTitle(title: 'CUENTA (donde ingreso)'),
-            const SizedBox(height: 10),
-            AccountSelector(
-              selectedAccountId: selectedAccount?.id,
-              onAccountSelected: (account) {
-                setState(() => selectedAccount = account);
-              },
-              onLongPress: (account) {
-                setState(() {
-                  selectedAccount = account;
-                });
-                showAccountOptionsDialog(context, account);
-              },
-            ),
-            const SizedBox(height: 25),
+                // ── Category Selector ─────────────────────────────────────────
+                CategorySelector(
+                  type: CategoryType.income,
+                  selectedCategoryId: selectedCategory?.id,
+                  onCategorySelected: (category) {
+                    setState(() => selectedCategory = category);
+                  },
+                  onLongPress: (CategoryEntity category) {
+                    setState(() {
+                      selectedCategory = category;
+                    });
+                    showCategoryOptionsDialog(context, category);
+                  },
+                ),
+                const SizedBox(height: 10),
 
-            CustomLabeledTextField(
-              label: "Nota / Descripción",
-              hint: "¿En qué lo usaste?",
-              controller: noteController,
-            ),
-            const SizedBox(height: 15),
+                const SelectionTitle(title: 'CUENTA (donde ingreso)'),
 
-            DateTimePicker(
-              selectedDate: dateTime,
-              onDateSelected: (date) => setState(() => dateTime = date),
-            ),
-            const SizedBox(height: 15),
+                // ── Account Selector ─────────────────────────────────────────
+                AccountSelector(
+                  selectedAccountId: selectedAccount?.id,
+                  onAccountSelected: (account) {
+                    setState(() => selectedAccount = account);
+                  },
+                  onLongPress: (account) {
+                    setState(() {
+                      selectedAccount = account;
+                    });
+                    showAccountOptionsDialog(context, account);
+                  },
+                ),
+                const SizedBox(height: 25),
 
-            PrivateToggle(
-              isPrivate: isPrivate,
-              onPrivateChanged: (v) => setState(() => isPrivate = v),
-            ),
-            const SizedBox(height: 15),
+                CustomLabeledTextField(
+                  label: "Nota / Descripción",
+                  hint: "¿En qué lo usaste?",
+                  controller: noteController,
+                ),
+                const SizedBox(height: 15),
 
-            AnimatedGenericButton(
-              type: TransactionType.income,
-              label: 'Registrar Ingreso', // o Gasto
-              onPressed: () {
-                final amount = double.tryParse(amountController.text) ?? 0.0;
+                DateTimePicker(
+                  selectedDate: dateTime,
+                  onDateSelected: (date) => setState(() => dateTime = date),
+                ),
+                const SizedBox(height: 15),
 
-                context.read<TransactionBloc>().add(
-                  AddTransactionEvent(
-                    amount: amount,
-                    note: noteController.text,
-                    date: dateTime,
-                    isPrivate: isPrivate,
-                    type: TransactionType.income, // o expense
-                    category: selectedCategory,
-                    account: selectedAccount!,
-                    toAccount: null,
-                    vaultId: 'vault12345',
-                  ),
-                );
-                Future.delayed(const Duration(milliseconds: 150), () {
-                  if (context.mounted) {
-                    context.read<AccountBloc>().add(LoadAccountsEvent());
-                    context.read<CategoryBloc>().add(LoadCategoriesEvent());
-                  }
-                });
-                _resetData(context);
-              },
-              colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+                PrivateToggle(
+                  isPrivate: isPrivate,
+                  onPrivateChanged: (v) => setState(() => isPrivate = v),
+                ),
+                const SizedBox(height: 15),
+
+                AnimatedGenericButton(
+                  type: TransactionType.income,
+                  label: 'Registrar Ingreso', // o Gasto
+                  onPressed: () {
+                    final amount =
+                        double.tryParse(amountController.text) ?? 0.0;
+
+                    context.read<TransactionBloc>().add(
+                      AddIncomeEvent(
+                        amount: amount,
+                        note: noteController.text,
+                        date: dateTime,
+                        isPrivate: isPrivate,
+                        icon: selectedCategory!.icon,
+                        color: selectedCategory!.color ?? Colors.orange,
+                        category: selectedCategory!,
+                        account: selectedAccount!,
+                        vaultId: 'vault_12345',
+                      ),
+                    );
+                    Future.delayed(const Duration(milliseconds: 150), () {
+                      if (context.mounted) {
+                        context.read<AccountBloc>().add(LoadAccountsEvent());
+                        context.read<CategoryBloc>().add(LoadCategoriesEvent());
+                      }
+                    });
+                    _resetData(context);
+                    Navigator.pop(context);
+                  },
+                  colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -6,11 +6,17 @@ class TransactionModel extends TransactionEntity {
     super.remoteId,
     required super.category,
     required super.amount,
+    required super.icon,
+    required super.color,
     required super.note,
     required super.isPrivate,
     super.ownerId = '',
     required super.date,
     required super.transactionType,
+    required super.categoryName,
+    required super.accountName,
+    required super.iconCode,
+    required super.colorHex,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +27,8 @@ class TransactionModel extends TransactionEntity {
       isPrivate: json['isPrivate'],
       date: json['date'],
       transactionType: json['type'],
+      icon: json['icon'],
+      color: json['color'],
     );
   }
 
@@ -32,6 +40,8 @@ class TransactionModel extends TransactionEntity {
       'isPrivate': isPrivate,
       'date': date,
       'type': transactionType,
+      'icon': icon,
+      'color': color,
     };
   }
 }

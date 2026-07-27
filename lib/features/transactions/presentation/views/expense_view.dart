@@ -18,7 +18,7 @@ import 'package:family_budget/features/transactions/presentation/bloc/transactio
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/generic_button.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/private_toggle.dart';
-import 'package:family_budget/features/transactions/presentation/widgets/selection_title.dart';
+import 'package:family_budget/core/widgets/selection_title.dart';
 import 'package:family_budget/features/transactions/presentation/widgets/textfield_amount_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -161,16 +161,16 @@ class _ExpenseViewState extends State<ExpenseView> {
                     }
 
                     context.read<TransactionBloc>().add(
-                      AddTransactionEvent(
+                      AddExpenseEvent(
                         amount: amount,
                         note: noteController.text,
                         date: dateTime,
+                        icon: selectedCategory!.icon,
+                        color: selectedCategory!.color ?? Colors.orange,
                         isPrivate: isPrivate,
-                        type: TransactionType.expense,
-                        category: selectedCategory,
+                        category: selectedCategory!,
                         account: selectedAccount!,
-                        toAccount: null,
-                        vaultId: 'vault12345',
+                        vaultId: 'vault_12345',
                       ),
                     );
                     Future.delayed(const Duration(milliseconds: 150), () {
@@ -180,6 +180,7 @@ class _ExpenseViewState extends State<ExpenseView> {
                       }
                     });
                     _resetData(context);
+                    Navigator.pop(context);
                   },
                   colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
                   type: TransactionType.expense,

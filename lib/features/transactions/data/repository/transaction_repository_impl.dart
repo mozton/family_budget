@@ -38,8 +38,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
       );
       for (final remoteTx in remoteTransactions) {
         final isarModel = remoteTx.toIsarModel();
-        // Upsert en la base local (basado en el remoteId)
-        await localDataSource.saveTransaction(isarModel);
+        // Upsert en la base local (basado en el remoteId) sin aplicar matemáticas
+        // porque Firebase ya tiene los saldos actualizados
+        await localDataSource.saveTransaction(isarModel, applyMath: false);
       }
       debugPrint(
         '🔄 Sync: ${remoteTransactions.length} transacciones sincronizadas desde Firestore',
@@ -71,17 +72,16 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<void> deleteTransaction(int id) async {
+  Future<void> deleteTransaction(String id) async {
     // 1. Eliminar en local
-    // TODO: implement deleteTransaction locally
+    await localDataSource.deleteTransaction(id);
 
-    // 2. Sincronizar eliminación
-    // try {
-    //   await remoteDataSource.deleteTransaction(transactionId);
-    // } catch (e) {
-    //   debugPrint('⚠️ Error al sincronizar deleteTransaction con remoto: $e');
-    // }
-    throw UnimplementedError();
+    // 2. Sincronizar eliminación con remoto
+    try {
+      await remoteDataSource.deleteTransaction(id);
+    } catch (e) {
+      debugPrint('⚠️ Error al sincronizar deleteTransaction con remoto: $e');
+    }
   }
 
   @override

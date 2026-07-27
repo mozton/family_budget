@@ -1,4 +1,4 @@
-import 'package:family_budget/core/widgets/transaction_list.dart';
+import 'package:family_budget/features/transactions/presentation/widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

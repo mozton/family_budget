@@ -1,5 +1,4 @@
 import 'package:family_budget/features/main_navigation/presentation/widgets/overview.dart';
-import 'package:family_budget/features/transactions/presentation/screens/movements_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:family_budget/features/categories/presentation/screens/budget_page.dart';

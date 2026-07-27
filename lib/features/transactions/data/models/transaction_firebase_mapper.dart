@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
+import 'package:flutter/material.dart';
 
 extension TransactionFirebaseMapper on TransactionEntity {
   Map<String, dynamic> toFirebaseMap(
@@ -17,6 +20,8 @@ extension TransactionFirebaseMapper on TransactionEntity {
       'toAccountId': toAccountId.isNotEmpty
           ? toAccountId
           : (toAccount?.remoteId ?? ''),
+      'iconCode': icon.codePoint,
+      'colorHex': color.value.toRadixString(16), // puede ser null
 
       'amount': amount,
       'note': note,
@@ -36,6 +41,11 @@ extension TransactionFirebaseMapper on TransactionEntity {
       remoteId: map['remoteId'] ?? docId,
       vaultId: map['vaultId'] ?? '',
       ownerId: map['ownerId'] ?? '',
+      icon: IconData(
+        map['iconCode'] ?? Icons.category.codePoint,
+        fontFamily: 'MaterialIcons',
+      ),
+      color: map['colorHex'],
 
       categoryId: map['categoryId'] ?? '',
       accountId: map['accountId'] ?? '',

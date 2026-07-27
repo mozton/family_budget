@@ -1,4 +1,4 @@
-import 'package:family_budget/core/widgets/transaction_list.dart';
+import 'package:family_budget/features/transactions/presentation/widgets/transaction_list.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_state.dart';
 

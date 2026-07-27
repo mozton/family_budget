@@ -67,9 +67,10 @@ class CategorySelector extends StatelessWidget {
               type: category.type!,
               color: category.color ?? const Color(0xFF9333EA),
               isSelected: isSelected,
-              amount: type == CategoryType.expense
-                  ? category.currentAmount
-                  : category.targetAmount ?? 0,
+              amount: category.currentAmount,
+              // type == CategoryType.expense
+              //     ? category.currentAmount
+              // : category.targetAmount ?? 0,
               onTap: () => onCategorySelected?.call(category),
               onLongPress: () => onLongPress(category),
             );

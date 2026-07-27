@@ -1,15 +1,27 @@
+import 'package:family_budget/core/widgets/custom_labeled_textfield.dart.dart';
 import 'package:family_budget/core/widgets/date_time_picker.dart';
+import 'package:family_budget/core/widgets/account_selector.dart';
+import 'package:family_budget/features/accounts/domain/entities/account_entity.dart';
+import 'package:family_budget/features/accounts/presentation/utils/account_dialogs.dart';
+
 import 'package:family_budget/features/categories/domain/entities/category_entity.dart'
     hide CategoryType;
-import 'package:family_budget/features/categories/presentation/bloc/category_bloc.dart';
-import 'package:family_budget/features/categories/presentation/bloc/category_state.dart';
+import 'package:family_budget/features/categories/domain/entities/category_entity.dart'
+    as category_entity;
+import 'package:family_budget/features/categories/presentation/utils/categories_dialogs.dart';
+import 'package:family_budget/features/categories/presentation/widgets/category_selector.dart';
 
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:family_budget/features/transactions/presentation/bloc/transaction_event.dart';
+import 'package:family_budget/features/transactions/presentation/widgets/generic_button.dart';
+import 'package:family_budget/features/transactions/presentation/widgets/private_toggle.dart';
+import 'package:family_budget/core/widgets/selection_title.dart';
+import 'package:family_budget/features/transactions/presentation/widgets/textfield_amount_input.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class EditTransactionScreen extends StatefulWidget {
@@ -21,36 +33,120 @@ class EditTransactionScreen extends StatefulWidget {
   State<EditTransactionScreen> createState() => _EditTransactionScreenState();
 }
 
-class _EditTransactionScreenState extends State<EditTransactionScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _amountController;
-  late TextEditingController _noteController;
-  late DateTime _dateTime;
+class _EditTransactionScreenState extends State<EditTransactionScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
-  late TransactionType _selectedType;
-
-  late bool _isPrivate;
-  CategoryEntity? _selectedCategory;
+  late TextEditingController amountController;
+  late TextEditingController noteController;
+  late DateTime dateTime;
+  late bool isPrivate;
+  AccountEntity? selectedAccount;
+  AccountEntity? toAccount;
+  CategoryEntity? selectedCategory;
 
   @override
   void initState() {
     super.initState();
-    // Inicializamos los valores con los datos existentes de la transacción
-    _amountController = TextEditingController(
-      text: widget.transaction.amount.toStringAsFixed(2),
+
+    int initialIndex = 0;
+    if (widget.transaction.transactionType == TransactionType.income) {
+      initialIndex = 1;
+    } else if (widget.transaction.transactionType == TransactionType.transfer) {
+      initialIndex = 2;
+    }
+
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: initialIndex,
     );
-    _noteController = TextEditingController(text: widget.transaction.note);
-    _selectedType = widget.transaction.transactionType;
-    _dateTime = widget.transaction.date;
-    _isPrivate = widget.transaction.isPrivate;
-    _selectedCategory = widget.transaction.category;
+
+    amountController = TextEditingController(
+      text: widget.transaction.amount.toString(),
+    );
+    noteController = TextEditingController(text: widget.transaction.note);
+    dateTime = widget.transaction.date;
+    isPrivate = widget.transaction.isPrivate;
+    selectedAccount = widget.transaction.account;
+    toAccount = widget.transaction.toAccount;
+    selectedCategory = widget.transaction.category;
   }
 
   @override
   void dispose() {
-    _amountController.dispose();
-    _noteController.dispose();
+    _tabController.dispose();
+    amountController.dispose();
+    noteController.dispose();
     super.dispose();
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  void _updateTransaction(TransactionType type) {
+    if (type == TransactionType.expense || type == TransactionType.income) {
+      if (selectedCategory == null) {
+        _showError('Por favor selecciona una categoría');
+        return;
+      }
+      if (selectedAccount == null) {
+        _showError('Por favor selecciona la cuenta');
+        return;
+      }
+    } else if (type == TransactionType.transfer) {
+      if (selectedAccount == null) {
+        _showError('Selecciona la cuenta de origen');
+        return;
+      }
+      if (toAccount == null) {
+        _showError('Selecciona la cuenta de destino');
+        return;
+      }
+      if (selectedAccount!.id == toAccount!.id) {
+        _showError('Origen y destino no pueden ser la misma cuenta');
+        return;
+      }
+    }
+
+    final amount = double.tryParse(amountController.text) ?? 0.0;
+    if (amount <= 0) {
+      _showError('El monto debe ser mayor a cero');
+      return;
+    }
+
+    final updatedTransaction = TransactionEntity(
+      id: widget.transaction.id,
+      color: widget.transaction.color,
+      icon: widget.transaction.icon,
+      remoteId: widget.transaction.remoteId,
+      amount: amount,
+      note: noteController.text,
+      date: dateTime,
+      isPrivate: isPrivate,
+      ownerId: widget.transaction.ownerId,
+      transactionType: type,
+      category: type == TransactionType.transfer ? null : selectedCategory,
+      categoryId: type == TransactionType.transfer
+          ? ''
+          : (selectedCategory?.id ?? ''),
+      account: selectedAccount,
+      accountId: selectedAccount?.id ?? '',
+      toAccount: type == TransactionType.transfer ? toAccount : null,
+      toAccountId: type == TransactionType.transfer
+          ? (toAccount?.id ?? '')
+          : '',
+      vaultId: widget.transaction.vaultId,
+    );
+
+    context.read<TransactionBloc>().add(
+      UpdateTransactionEvent(updatedTransaction),
+    );
+
+    Navigator.pop(context);
   }
 
   @override
@@ -61,463 +157,301 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF1F2937),
-          ),
+          icon: const Icon(TablerIcons.arrow_back, color: Colors.grey),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Editar Transacción",
+          'Editar Transacción',
           style: GoogleFonts.quicksand(
-            fontWeight: FontWeight.bold,
             color: const Color(0xFF1F2937),
+            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Selector de Tipo (Gasto / Ingreso / Transferencia)
-                _buildTypeSelector(),
-                const SizedBox(height: 32),
-
-                // Input de Monto Estilizado
-                _buildAmountInput(),
-                const SizedBox(height: 32),
-
-                // Lista de Categorías de tu CategoryBloc
-                Text(
-                  "Selecciona una Categoría",
-                  style: GoogleFonts.quicksand(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[600],
+      body: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(microseconds: 0),
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              dividerColor: Colors.transparent,
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 5,
                   ),
-                ),
-                const SizedBox(height: 12),
-                _buildCategoryList(),
-                const SizedBox(height: 32),
-
-                // Nota de Transacción
-                _buildNoteInput(),
-                const SizedBox(height: 20),
-
-                // Fecha de Transacción
-                DateTimePicker(
-                  selectedDate: _dateTime,
-                  onDateSelected: (date) {
-                    setState(() {
-                      _dateTime = date;
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Toggle de Privacidad (Bóveda Personal vs Compartida 🔒)
-                _buildPrivacyToggle(),
-                const SizedBox(height: 40),
-
-                // Botón para Guardar Cambios
-                _buildSaveButton(),
-                const SizedBox(height: 20),
+                ],
+              ),
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.grey[500],
+              labelStyle: GoogleFonts.quicksand(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+              tabs: const [
+                Tab(text: 'Gasto'),
+                Tab(text: 'Ingreso'),
+                Tab(text: 'Transferir'),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeSelector() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: TransactionType.values.map((type) {
-          final isSelected = _selectedType == type;
-          String label = "";
-          Color activeColor = const Color(0xFF9333EA);
-
-          switch (type) {
-            case TransactionType.expense:
-              label = "Gasto";
-              activeColor = Colors.redAccent;
-              break;
-            case TransactionType.income:
-              label = "Ingreso";
-              activeColor = Colors.green;
-              break;
-            case TransactionType.transfer:
-              label = "Traspaso";
-              activeColor = Colors.blueAccent;
-              break;
-          }
-
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedType = type),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: Center(
-                  child: Text(
-                    label,
-                    style: GoogleFonts.quicksand(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? activeColor : Colors.grey[400],
-                    ),
-                  ),
-                ),
-              ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildExpenseTab(),
+                _buildIncomeTab(),
+                _buildTransferTab(),
+              ],
             ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildAmountInput() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.01),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            "CANTIDAD",
-            style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[400],
-              letterSpacing: 1.5,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "\$",
-                style: GoogleFonts.quicksand(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: _selectedType == TransactionType.expense
-                      ? Colors.red[300]
-                      : _selectedType == TransactionType.income
-                      ? Colors.green[300]
-                      : Colors.blue[300],
-                ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 180,
-                child: TextFormField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.quicksand(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1F2937),
-                  ),
-                  decoration: const InputDecoration(
-                    hintText: "0.00",
-                    border: InputBorder.none,
-                    isDense: true,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Ingresa un monto";
-                    }
-                    if (double.tryParse(value) == null) {
-                      return "Monto no válido";
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryList() {
-    return BlocBuilder<CategoryBloc, CategoryState>(
-      builder: (context, state) {
-        // En tu estado real, asumo que tienes 'state.categories' o similar.
-        // Si no está cargado o tu lista es dinámica:
-        final categories = state.categories;
-
-        if (categories.isEmpty) {
-          return Center(
-            child: Text(
-              "No hay categorías creadas aún",
-              style: GoogleFonts.quicksand(color: Colors.grey),
-            ),
-          );
-        }
-
-        return SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final cat = categories[index];
-              final isSelected = _selectedCategory?.id == cat.id;
-
-              return Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: GestureDetector(
-                  onTap: () => setState(() => _selectedCategory = cat),
-                  child: Column(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        height: 64,
-                        width: 64,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFF3E8FF)
-                              : Colors.grey[50],
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected
-                                ? const Color(0xFFD8B4FE)
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: const Color(
-                                      0xFF9333EA,
-                                    ).withValues(alpha: 0.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ]
-                              : [],
-                        ),
-                        child: Center(
-                          child: Icon(
-                            cat.icon,
-                            size: 28,
-                            color: isSelected
-                                ? const Color(0xFF9333EA)
-                                : const Color(0xFF1F2937),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        cat.name,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 10,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? const Color(0xFF1F2937)
-                              : Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildNoteInput() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[100]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "NOTA / DESCRIPCIÓN",
-            style: GoogleFonts.quicksand(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[400],
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 4),
-          TextFormField(
-            controller: _noteController,
-            style: GoogleFonts.quicksand(
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1F2937),
-            ),
-            decoration: const InputDecoration(
-              hintText: "Ej: Supermercado semanal",
-              border: InputBorder.none,
-              isDense: true,
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return "Ingresa una descripción";
-              }
-              return null;
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPrivacyToggle() {
-    return InkWell(
-      onTap: () => setState(() => _isPrivate = !_isPrivate),
-      borderRadius: BorderRadius.circular(20),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: _isPrivate ? const Color(0xFFFAF5FF) : Colors.grey[50],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: _isPrivate ? const Color(0xFFE9D5FF) : Colors.grey[100]!,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildExpenseTab() {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Column(
           children: [
-            Row(
-              children: [
-                Text(
-                  _isPrivate ? "🔒" : "🔓",
-                  style: const TextStyle(fontSize: 24),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Gasto Privado",
-                      style: GoogleFonts.quicksand(
-                        fontWeight: FontWeight.bold,
-                        color: _isPrivate
-                            ? const Color(0xFF701A75)
-                            : const Color(0xFF1F2937),
-                      ),
-                    ),
-                    Text(
-                      "No se mostrará en el feed de tu pareja",
-                      style: GoogleFonts.quicksand(
-                        fontSize: 10,
-                        color: Colors.grey[400],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            TextfieldAmountInput(
+              color: const Color(0xFFF87171),
+              controller: amountController,
             ),
-            Switch(
-              value: _isPrivate,
-              activeColor: const Color(0xFF9333EA),
-              onChanged: (value) => setState(() => _isPrivate = value),
+            const SizedBox(height: 20),
+
+            const SelectionTitle(title: 'CUENTA (con que pagaste)'),
+            const SizedBox(height: 10),
+            AccountSelector(
+              selectedAccountId: selectedAccount?.id,
+              onAccountSelected: (account) {
+                setState(() => selectedAccount = account);
+              },
+              onLongPress: (account) {
+                setState(() {
+                  selectedAccount = account;
+                });
+                showAccountOptionsDialog(context, account);
+              },
             ),
+            const SizedBox(height: 20),
+
+            const SelectionTitle(title: 'CATEGORÍA'),
+            const SizedBox(height: 10),
+            CategorySelector(
+              type: category_entity.CategoryType.expense,
+              selectedCategoryId: selectedCategory?.id,
+              onCategorySelected: (category) {
+                setState(() => selectedCategory = category);
+              },
+              onLongPress: (CategoryEntity category) {
+                setState(() {
+                  selectedCategory = category;
+                });
+                showCategoryOptionsDialog(context, category);
+              },
+            ),
+            const SizedBox(height: 15),
+
+            CustomLabeledTextField(
+              label: 'Nota / Descripción',
+              hint: '¿En qué lo usaste?',
+              controller: noteController,
+            ),
+            const SizedBox(height: 15),
+
+            DateTimePicker(
+              selectedDate: dateTime,
+              onDateSelected: (date) => setState(() => dateTime = date),
+            ),
+            const SizedBox(height: 10),
+
+            PrivateToggle(
+              isPrivate: isPrivate,
+              onPrivateChanged: (v) => setState(() => isPrivate = v),
+            ),
+            const SizedBox(height: 20),
+
+            AnimatedGenericButton(
+              label: 'Guardar Cambios',
+              onPressed: () => _updateTransaction(TransactionType.expense),
+              colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+              type: TransactionType.expense,
+            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          final amount = double.parse(_amountController.text);
-          final note = _noteController.text;
-          final updatedTransaction = TransactionEntity(
-            id: widget.transaction.id,
-            remoteId: widget.transaction.remoteId,
-            amount: amount,
-            note: note,
-            date: _dateTime,
-            isPrivate: _isPrivate,
-            ownerId: widget.transaction.ownerId,
-            transactionType: _selectedType,
-            category: _selectedCategory,
-          );
+  Widget _buildIncomeTab() {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Column(
+          children: [
+            TextfieldAmountInput(
+              color: const Color(0xFF10B981),
+              controller: amountController,
+            ),
+            const SizedBox(height: 15),
 
-          // Disparamos el evento de actualización en nuestro BLoC de transacciones
-          context.read<TransactionBloc>().add(
-            UpdateTransactionEvent(updatedTransaction),
-          );
+            const SelectionTitle(title: 'CATEGORÍA'),
+            const SizedBox(height: 10),
+            CategorySelector(
+              type: category_entity.CategoryType.income,
+              selectedCategoryId: selectedCategory?.id,
+              onCategorySelected: (category) {
+                setState(() => selectedCategory = category);
+              },
+              onLongPress: (CategoryEntity category) {
+                setState(() {
+                  selectedCategory = category;
+                });
+                showCategoryOptionsDialog(context, category);
+              },
+            ),
+            const SizedBox(height: 10),
 
-          // Regresamos a la pantalla anterior
-          Navigator.pop(context);
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF9333EA),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          elevation: 4,
-          shadowColor: const Color(0xFF9333EA).withOpacity(0.2),
+            const SelectionTitle(title: 'CUENTA (donde ingreso)'),
+            AccountSelector(
+              selectedAccountId: selectedAccount?.id,
+              onAccountSelected: (account) {
+                setState(() => selectedAccount = account);
+              },
+              onLongPress: (account) {
+                setState(() {
+                  selectedAccount = account;
+                });
+                showAccountOptionsDialog(context, account);
+              },
+            ),
+            const SizedBox(height: 25),
+
+            CustomLabeledTextField(
+              label: "Nota / Descripción",
+              hint: "¿En qué lo usaste?",
+              controller: noteController,
+            ),
+            const SizedBox(height: 15),
+
+            DateTimePicker(
+              selectedDate: dateTime,
+              onDateSelected: (date) => setState(() => dateTime = date),
+            ),
+            const SizedBox(height: 15),
+
+            PrivateToggle(
+              isPrivate: isPrivate,
+              onPrivateChanged: (v) => setState(() => isPrivate = v),
+            ),
+            const SizedBox(height: 15),
+
+            AnimatedGenericButton(
+              type: TransactionType.income,
+              label: 'Guardar Cambios',
+              onPressed: () => _updateTransaction(TransactionType.income),
+              colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+            ),
+            const SizedBox(height: 40),
+          ],
         ),
-        child: Text(
-          "GUARDAR CAMBIOS",
-          style: GoogleFonts.quicksand(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
+      ),
+    );
+  }
+
+  Widget _buildTransferTab() {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Column(
+          children: [
+            TextfieldAmountInput(
+              color: const Color(0xFF3B82F6),
+              controller: amountController,
+            ),
+            const SizedBox(height: 20),
+
+            const SelectionTitle(title: 'Transferir desde '),
+            const SizedBox(height: 10),
+            AccountSelector(
+              selectedAccountId: selectedAccount?.id,
+              onAccountSelected: (account) {
+                setState(() {
+                  selectedAccount = account;
+                });
+              },
+              onLongPress: (account) {
+                setState(() {
+                  selectedAccount = account;
+                });
+                showAccountOptionsDialog(context, account);
+              },
+            ),
+            const SizedBox(height: 15),
+
+            const SelectionTitle(title: 'Transferir a '),
+            const SizedBox(height: 10),
+            AccountSelector(
+              selectedAccountId: toAccount?.id,
+              onAccountSelected: (account) {
+                setState(() {
+                  toAccount = account;
+                });
+              },
+              onLongPress: (account) {
+                setState(() {
+                  toAccount = account;
+                });
+                showAccountOptionsDialog(context, account);
+              },
+            ),
+            const SizedBox(height: 20),
+
+            CustomLabeledTextField(
+              label: "Nota / Descripción",
+              hint: "¿En qué lo usaste?",
+              controller: noteController,
+            ),
+            const SizedBox(height: 15),
+
+            DateTimePicker(
+              selectedDate: dateTime,
+              onDateSelected: (date) => setState(() => dateTime = date),
+            ),
+            const SizedBox(height: 15),
+
+            PrivateToggle(
+              isPrivate: isPrivate,
+              onPrivateChanged: (v) => setState(() => isPrivate = v),
+            ),
+            const SizedBox(height: 15),
+
+            AnimatedGenericButton(
+              type: TransactionType.transfer,
+              label: 'Guardar Cambios',
+              onPressed: () => _updateTransaction(TransactionType.transfer),
+              colors: const [Color(0xFFA18CD1), Color(0xFFFBC2EB)],
+            ),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );

@@ -157,7 +157,7 @@ class _NewAccountScreenState extends State<NewAccountScreen> {
                 label: 'Saldo / Balance Inicial',
                 hint: '\$0.00',
                 controller: balanceController,
-                keyboardType: TextInputType.numberWithOptions(),
+                keyboardType: TextInputType.numberWithOptions(signed: true),
               ),
 
               const SizedBox(height: 12),

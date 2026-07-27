@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:family_budget/features/categories/data/models/category_mapper.dart';
 import 'package:family_budget/features/accounts/data/models/account_isar_mapper.dart';
 
 import 'package:family_budget/features/transactions/data/models/transaction_isar_model.dart';
 import 'package:family_budget/features/transactions/domiain/entities/transaction_entity.dart';
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 extension TransactionIsarMapper on TransactionIsarModel {
@@ -12,6 +15,12 @@ extension TransactionIsarMapper on TransactionIsarModel {
           ? remoteId!
           : id.toString(),
       remoteId: remoteId ?? '',
+      icon: IconData(
+        iconCodePoint,
+        fontFamily: "tabler-icons",
+        fontPackage: "flutter_tabler_icons",
+      ), // O el campo que uses para el icono
+      color: Color(colorValue),
 
       // Nota: Usamos '.value' porque en Isar las relaciones son IsarLink.
       // Se debe asegurar de cargar los links (ej. await transaction.category.load()) antes de mapear.
@@ -54,6 +63,8 @@ extension TransactionEntityMapper on TransactionEntity {
       ..note = note
       ..isPrivate = isPrivate
       ..date = date
+      ..iconCodePoint = icon.codePoint
+      ..colorValue = color.value
       ..ownerId = ownerId.isNotEmpty ? ownerId : (category?.ownerId ?? '')
       ..vaultId = vaultId
       ..categoryId = categoryId.isNotEmpty
