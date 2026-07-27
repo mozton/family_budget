@@ -120,8 +120,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen>
 
     final updatedTransaction = TransactionEntity(
       id: widget.transaction.id,
-      color: widget.transaction.color,
-      icon: widget.transaction.icon,
+
       remoteId: widget.transaction.remoteId,
       amount: amount,
       note: noteController.text,
@@ -140,6 +139,10 @@ class _EditTransactionScreenState extends State<EditTransactionScreen>
           ? (toAccount?.id ?? '')
           : '',
       vaultId: widget.transaction.vaultId,
+      categoryName: '',
+      accountName: '',
+      iconCode: '',
+      colorHex: null,
     );
 
     context.read<TransactionBloc>().add(
